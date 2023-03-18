@@ -1,0 +1,32 @@
+plugins {
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url uri("${projectDir}/maven/repositories")
+    }
+}
+
+dependencies {
+    // Local
+    implementation "net.luis:LUtils:${LUtils}" // Utility
+    // Google
+    implementation "com.google.guava:guava:${GoogleGuava}" // Utility
+    // Apache
+    implementation "org.apache.logging.log4j:log4j-api:${Log4jAPI}" // Logging
+    implementation "org.apache.logging.log4j:log4j-core:${Log4jCore}" // Logging
+    implementation "org.apache.commons:commons-lang3:${ApacheLang}" // Utility
+    // Netty
+    implementation "io.netty:netty-all:${Netty}" // Network
+    // Other
+    implementation "org.jetbrains:annotations:${JetBrainsAnnotations}" // Annotations
+    // Test
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.8.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.1"
+}
+
+test {
+    useJUnitPlatform()
+}
