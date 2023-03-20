@@ -3,6 +3,7 @@ package net.luis.netcore.packet;
 import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
+import net.luis.netcore.packet.impl.*;
 import net.luis.utils.util.reflection.ClassPathUtils;
 import net.luis.utils.util.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
@@ -82,14 +83,15 @@ public class PacketRegistry {
 	
 	
 	static {
-		/* TODO
-		register(HandshakePacket.class);
+		register(EmptyPacket.class);
 		register(IntegerPacket.class);
 		register(LongPacket.class);
 		register(DoublePacket.class);
 		register(StringPacket.class);
 		register(ObjectPacket.class);
-		*/
+		register(HandshakePacket.class);
+		register(ErrorPacket.class);
+		System.gc();
 		ClassPathUtils.getAnnotatedClasses(AutoPacket.class).stream().filter(clazz -> {
 			if (Packet.class.isAssignableFrom(clazz)) {
 				return true;
@@ -101,7 +103,6 @@ public class PacketRegistry {
 			LOGGER.debug("Automatically registering packet {}", clazz.getSimpleName());
 		}).forEach(clazz -> register((Class<? extends Packet>) clazz));
 	}
-	
 	
 	
 }

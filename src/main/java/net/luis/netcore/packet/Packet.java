@@ -19,5 +19,4 @@ public interface Packet extends Encodable, Decodable {
 	default boolean skippable() {
 		return false;
 	}
-	
 }
