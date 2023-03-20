@@ -153,6 +153,11 @@ public class FriendlyByteBuffer {
 		object.encode(this);
 	}
 	
+	public void writeUnsafe(@NotNull Object object) {
+		this.writeString(object.getClass().getName());
+		this.write((Encodable & Decodable) object);
+	}
+	
 	public <T extends Encodable & Decodable> void writeInterface(@NotNull T value) {
 		this.writeString(value.getClass().getName());
 		this.write(value);
@@ -162,6 +167,12 @@ public class FriendlyByteBuffer {
 	//region Read objects
 	public <T extends Encodable & Decodable> T read(@NotNull Class<T> clazz) {
 		return Decodable.decode(clazz, this);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T, V extends Encodable & Decodable> T readUnsafe() {
+		Class<V> clazz = (Class<V>) ReflectionHelper.getClassForName(this.readString());
+		return (T) this.read(clazz);
 	}
 	
 	@SuppressWarnings("unchecked")
