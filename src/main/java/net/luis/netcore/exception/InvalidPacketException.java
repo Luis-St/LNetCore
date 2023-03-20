@@ -2,8 +2,6 @@ package net.luis.netcore.exception;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serial;
-
 /**
  *
  * @author Luis-St
