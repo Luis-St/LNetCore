@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
+import net.luis.netcore.packet.registry.PacketRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

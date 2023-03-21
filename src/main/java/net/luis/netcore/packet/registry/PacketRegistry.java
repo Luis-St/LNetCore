@@ -1,8 +1,9 @@
-package net.luis.netcore.packet;
+package net.luis.netcore.packet.registry;
 
 import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
+import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.*;
 import net.luis.utils.util.reflection.ClassPathUtils;
 import net.luis.utils.util.reflection.ReflectionHelper;
