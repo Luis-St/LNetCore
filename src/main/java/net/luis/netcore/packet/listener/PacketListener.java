@@ -12,10 +12,14 @@ import java.lang.annotation.*;
  */
 
 @Documented
-@Target(ElementType.METHOD)
+@Target({
+		ElementType.METHOD, ElementType.TYPE
+})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PacketListener {
 	
 	@NotNull Class<? extends Packet> value() default Packet.class;
-
+	
+	int priority() default 0;
+	
 }
