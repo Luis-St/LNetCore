@@ -9,11 +9,11 @@ import java.lang.annotation.*;
  */
 
 @Documented
-@Target({
+@java.lang.annotation.Target({
 		ElementType.METHOD, ElementType.TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ListenerTarget {
+public @interface Target {
 	
 	int value() default -1;
 	

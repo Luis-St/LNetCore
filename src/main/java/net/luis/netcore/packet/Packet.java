@@ -11,12 +11,22 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public interface Packet extends Encodable, Decodable {
+public abstract class Packet implements Encodable, Decodable {
+	
+	private final int target = -1;
+	
+	public Packet() {
+	
+	}
+	
+	public Packet(@NotNull FriendlyByteBuffer buffer) {
+	
+	}
 	
 	@Override
-	void encode(@NotNull FriendlyByteBuffer buffer);
+	public abstract void encode(@NotNull FriendlyByteBuffer buffer);
 	
-	default boolean skippable() {
+	public boolean skippable() {
 		return false;
 	}
 }

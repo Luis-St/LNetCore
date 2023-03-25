@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -52,15 +53,18 @@ public class PacketRegistry {
 			try {
 				if (ReflectionHelper.hasConstructor(clazz, FriendlyByteBuffer.class)) {
 					Constructor<? extends Packet> constructor = ReflectionHelper.getConstructor(clazz, FriendlyByteBuffer.class);
-					assert constructor != null;
-					return constructor.newInstance(buffer);
+					return Objects.requireNonNull(constructor).newInstance(buffer);
 				} else {
 					LOGGER.error("Packet {} does not have a constructor with FriendlyByteBuffer as parameter", clazz.getSimpleName());
 					throw new InvalidPacketException("Packet " + clazz.getSimpleName() + " does not have a FriendlyByteBuffer constructor");
 				}
 			} catch (Exception e) {
-				LOGGER.error("Fail to create packet of type {} for id {}", clazz.getSimpleName(), id);
-				throw new RuntimeException(e);
+				if (e instanceof InvalidPacketException) {
+					throw (InvalidPacketException) e;
+				} else {
+					LOGGER.error("Fail to create packet of type {} for id {}", clazz.getSimpleName(), id);
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		return null;
@@ -82,7 +86,6 @@ public class PacketRegistry {
 		}
 	}
 	
-	
 	static {
 		register(EmptyPacket.class);
 		register(IntegerPacket.class);
@@ -92,7 +95,6 @@ public class PacketRegistry {
 		register(ObjectPacket.class);
 		register(HandshakePacket.class);
 		register(ErrorPacket.class);
-		System.gc();
 		ClassPathUtils.getAnnotatedClasses(AutoPacket.class).stream().filter(clazz -> {
 			if (Packet.class.isAssignableFrom(clazz)) {
 				return true;
@@ -104,6 +106,4 @@ public class PacketRegistry {
 			LOGGER.debug("Automatically registering packet {}", clazz.getSimpleName());
 		}).forEach(clazz -> register((Class<? extends Packet>) clazz));
 	}
-	
-	
 }

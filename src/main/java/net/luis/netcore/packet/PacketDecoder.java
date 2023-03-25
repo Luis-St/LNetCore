@@ -6,6 +6,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.registry.PacketRegistry;
+import net.luis.utils.util.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
 		if (i != 0) {
 			FriendlyByteBuffer buffer = new FriendlyByteBuffer(input);
 			int id = buffer.readInt();
+			int target = buffer.readInt();
 			Packet packet = PacketRegistry.getPacket(id, buffer);
 			if (packet == null) {
 				LOGGER.error("Failed to get packet for id {}", id);
@@ -43,6 +45,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
 						throw new IOException("Packet was too big than expected, found " + readableBytes + " extra bytes while reading packet " + packet.getClass().getSimpleName() + " with id " + id);
 					}
 				} else {
+					ReflectionHelper.set(Packet.class, "target", packet, target);
 					output.add(packet);
 				}
 			}
@@ -51,7 +54,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
 	
 	@Override
 	public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
-		LOGGER.error("Caught an exception while decoding a packet");
+		LOGGER.error("Caught an exception while decoding a packet", cause);
 	}
 	
 }

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class HandshakePacket implements Packet {
+public class HandshakePacket extends Packet {
 	
 	public HandshakePacket() {
 	

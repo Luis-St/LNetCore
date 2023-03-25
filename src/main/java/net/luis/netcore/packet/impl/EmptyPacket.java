@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class EmptyPacket implements Packet {
+public class EmptyPacket extends Packet {
 	
 	public EmptyPacket() {
 	

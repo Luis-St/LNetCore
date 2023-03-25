@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class DoublePacket implements Packet {
+public class DoublePacket extends Packet {
 	
 	private final double value;
 	

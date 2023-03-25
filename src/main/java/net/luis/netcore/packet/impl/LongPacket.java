@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class LongPacket implements Packet {
+public class LongPacket extends Packet {
 	
 	private final long value;
 	

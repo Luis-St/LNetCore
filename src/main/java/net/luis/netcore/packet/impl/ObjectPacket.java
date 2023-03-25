@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class ObjectPacket implements Packet {
+public class ObjectPacket extends Packet {
 	
 	private final Object value;
 	

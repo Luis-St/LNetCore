@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class ErrorPacket implements Packet {
+public class ErrorPacket extends Packet {
 	
 	private final String message;
 	private final int errorCode;
