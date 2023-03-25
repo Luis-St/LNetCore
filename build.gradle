@@ -1,5 +1,6 @@
 plugins {
 	id "java"
+	id "maven-publish"
 }
 
 repositories {
@@ -29,4 +30,41 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+java {
+	withSourcesJar()
+}
+
+artifacts {
+	archives sourcesJar
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = "net.luis"
+			artifactId = "LNetCore"
+			version = "1.0"
+			artifact jar
+			artifact sourcesJar
+		}
+	}
+	repositories {
+		maven {
+			url uri("C:/Users/luiss/.m2/repository")
+		}
+		maven {
+			url uri("${projectDir}/maven/repositories")
+		}
+	}
+}
+
+jar {
+	manifest {
+		attributes([
+				"Built-By": "Luis Staudt",
+				"Multi-Release": "true"
+		])
+	}
 }
