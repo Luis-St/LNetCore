@@ -4,6 +4,7 @@ import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.*;
+import java.lang.annotation.Target;
 
 /**
  *
