@@ -1,4 +1,4 @@
-package net.luis.netcore.packet.impl;
+package net.luis.netcore.packet.impl.value;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;

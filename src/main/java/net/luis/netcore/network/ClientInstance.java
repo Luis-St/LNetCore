@@ -21,10 +21,10 @@ public class ClientInstance extends AbstractNetworkInstance {
 	@Override
 	public void open() {
 		try {
-			new Connection(new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
+			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
 				this.connection = new Connection(channel);
 				return this.connection;
-			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel());
+			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();
 		} catch (Exception e) {
 			throw new RuntimeException("Fail to start client", e);
 		}
