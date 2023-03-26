@@ -4,6 +4,9 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import net.luis.utils.util.DefaultExceptionHandler;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  *
@@ -13,17 +16,19 @@ import net.luis.utils.util.DefaultExceptionHandler;
 
 abstract class AbstractNetworkInstance implements NetworkInstance {
 	
-	
 	private final String host;
 	private final int port;
 	private EventLoopGroup group;
 	
 	public AbstractNetworkInstance(String host, int port) {
-		this.host = host;
+		if (host == null || host.isEmpty()) {
+			throw new IllegalArgumentException("Host cannot be null or empty");
+		}
+		this.host = "localhost".equalsIgnoreCase(host) ? "127.0.0.1" : host;
 		this.port = port;
 	}
 	
-	protected String getHost() {
+	protected @NotNull String getHost() {
 		return this.host;
 	}
 	
@@ -31,7 +36,7 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 		return this.port;
 	}
 	
-	protected final EventLoopGroup buildGroup(String nameFormat) {
+	protected final @NotNull EventLoopGroup buildGroup(String nameFormat) {
 		this.group = new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat(nameFormat).setUncaughtExceptionHandler(new DefaultExceptionHandler()).build());
 		return this.group;
 	}
@@ -42,7 +47,7 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 	}
 	
 	@Override
-	public final void close() {
+	public void close() {
 		this.group.shutdownGracefully();
 		this.group = null;
 	}
