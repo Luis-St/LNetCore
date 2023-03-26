@@ -3,6 +3,9 @@ package net.luis.netcore.connection;
 import com.google.common.collect.Lists;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketGetter;
+import net.luis.netcore.packet.listener.PacketListener;
+import net.luis.netcore.packet.listener.PacketPriority;
+import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.util.reflection.ClassPathUtils;
 import net.luis.utils.util.reflection.Nullability;
 import net.luis.utils.util.reflection.ReflectionHelper;
@@ -26,6 +29,53 @@ class ListenerHelper {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ListenerHelper.class);
 	
+	static @NotNull String getName(@NotNull Object listener) {
+		return listener.toString().split("/")[0].replace("$$", "$");
+	}
+	
+	static int getTarget() {
+		StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[3];
+		try {
+			Class<?> clazz = ReflectionHelper.getClassForName(stackTrace.getClassName());
+			Method method = ReflectionHelper.getMethod(clazz, stackTrace.getMethodName());
+			if (method.isAnnotationPresent(PacketTarget.class)) {
+				return method.getAnnotation(PacketTarget.class).value();
+			} else if (clazz.isAnnotationPresent(PacketTarget.class)) {
+				return clazz.getAnnotation(PacketTarget.class).value();
+			} else {
+				return -1;
+			}
+		} catch (Exception | Error e) {
+			return -1;
+		}
+	}
+	
+	static int getPriority() {
+		StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[3];
+		try {
+			Class<?> clazz = ReflectionHelper.getClassForName(stackTrace.getClassName());
+			List<Method> methods = getMethodsForName(clazz, stackTrace.getMethodName()).stream().filter(method -> method.isAnnotationPresent(PacketPriority.class)).toList();
+			if (methods.size() == 1 && methods.get(0).isAnnotationPresent(PacketPriority.class)) {
+				return methods.get(0).getAnnotation(PacketPriority.class).value();
+			} else if (clazz.isAnnotationPresent(PacketPriority.class)) {
+				return clazz.getAnnotation(PacketPriority.class).value();
+			}
+		} catch (Exception | Error ignored) {
+		
+		}
+		return 0;
+	}
+	
+	private static @NotNull List<Method> getMethodsForName(@NotNull Class<?> clazz, String name) {
+		List<Method> methods = Lists.newArrayList();
+		for (Method method : clazz.getDeclaredMethods()) {
+			if (method.getName().equals(name)) {
+				methods.add(method);
+			}
+		}
+		return methods;
+	}
+	
 	static @NotNull Object[] getParameters(@NotNull Method listener, @NotNull Connection connection, @NotNull Packet packet) {
 		Parameter[] parameters = listener.getParameters();
 		Object[] arguments = new Object[parameters.length];
@@ -35,9 +85,11 @@ class ListenerHelper {
 				arguments[i] = connection;
 			} else if (parameter.getType().isAssignableFrom(packet.getClass())) {
 				arguments[i] = packet;
-			} else {
+			} else if (listener.getAnnotation(PacketListener.class).value() == packet.getClass()) {
 				GetterInfo getter = findParameter(listener, packet, parameter);
 				arguments[i] = ReflectionHelper.invoke(getter.getter(), packet);
+			} else {
+				throw new IllegalStateException("No getter for parameter " + parameter.getName() + " in packet " + packet + " found");
 			}
 		}
 		return arguments;
@@ -52,23 +104,25 @@ class ListenerHelper {
 					return checkNullability(parameter, getter);
 				} else if (!parameter.isNamePresent()) {
 					throw new IllegalArgumentException("The parameter " + parameter.getName() + " of method " + listener.getDeclaringClass().getSimpleName() + "#" + listener.getName() + " is ambiguous");
-				} else if (parameter.getName().equals(getter.parameterName())) {
+				} else if (parameter.getName().equalsIgnoreCase(getter.parameterName())) {
 					return checkNullability(parameter, getter);
 				}
 			}
 		}
-		throw new IllegalArgumentException("No getter for parameter " + parameter.getName() + " in packet " + packet.getClass().getSimpleName() + " found");
+		throw new IllegalArgumentException("No getter for parameter " + parameter.getName() + " in packet " + packet + " found");
 	}
 	
 	private static @NotNull List<GetterInfo> disassemblePacket(@NotNull Class<? extends Packet> clazz) {
 		List<GetterInfo> getters = Lists.newArrayList();
 		for (Method annotatedMethod : ClassPathUtils.getAnnotatedMethods(clazz, PacketGetter.class)) {
+			PacketGetter getter = annotatedMethod.getAnnotation(PacketGetter.class);
 			if (annotatedMethod.getParameters().length > 0) {
 				LOGGER.warn("The method {}#{} is annotated with @PacketGetter but requires parameters, which is not allowed", clazz.getSimpleName(), annotatedMethod.getName());
 				continue;
 			}
-			String name = ReflectionUtils.getRawName(annotatedMethod);
-			getters.add(new GetterInfo(annotatedMethod, annotatedMethod.getReturnType(), name.substring(0, 1).toLowerCase() + name.substring(1), ReflectionUtils.getNullability(annotatedMethod.getAnnotatedReturnType())));
+			String name = ReflectionUtils.getRawName(annotatedMethod, getter.getterPrefix());
+			String parameterName = getter.parameterName().isEmpty() ? name.substring(0, 1).toLowerCase() + name.substring(1) : getter.parameterName();
+			getters.add(new GetterInfo(annotatedMethod, annotatedMethod.getReturnType(), parameterName, ReflectionUtils.getNullability(annotatedMethod.getAnnotatedReturnType())));
 		}
 		return getters;
 	}
