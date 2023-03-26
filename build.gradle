@@ -28,6 +28,18 @@ dependencies {
 	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.1"
 }
 
+tasks.register("testClient", JavaExec) {
+	group = "test"
+	classpath = sourceSets.test.runtimeClasspath
+	getMainClass().set("net.luis.netcore.ClientTest")
+}
+
+tasks.register("testServer", JavaExec) {
+	group = "test"
+	classpath = sourceSets.test.runtimeClasspath
+	getMainClass().set("net.luis.netcore.ServerTest")
+}
+
 test {
 	useJUnitPlatform()
 }
