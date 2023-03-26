@@ -1,8 +1,5 @@
 package net.luis.netcore.packet.listener;
 
-import net.luis.netcore.packet.Packet;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.annotation.*;
 
 /**
@@ -16,8 +13,8 @@ import java.lang.annotation.*;
 		ElementType.METHOD, ElementType.TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PacketListener {
+public @interface PacketPriority {
 	
-	@NotNull Class<? extends Packet> value() default Packet.class;
+	int value() default 0;
 	
 }

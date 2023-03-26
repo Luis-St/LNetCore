@@ -9,12 +9,14 @@ import java.lang.annotation.*;
  */
 
 @Documented
-@java.lang.annotation.Target({
+@Target({
 		ElementType.METHOD, ElementType.TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Target {
+public @interface PacketTarget {
 	
-	int value() default -1;
+	int ANY_TARGET = -1;
+	
+	int value() default ANY_TARGET;
 	
 }
