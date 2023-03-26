@@ -3,7 +3,6 @@ package net.luis.netcore.packet.listener;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.*;
-import java.lang.annotation.Target;
 
 /**
  *
