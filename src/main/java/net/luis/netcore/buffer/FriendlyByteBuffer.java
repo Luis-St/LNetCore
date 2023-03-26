@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,8 +30,8 @@ public class FriendlyByteBuffer {
 		this(Unpooled.buffer());
 	}
 	
-	public FriendlyByteBuffer(ByteBuf buffer) {
-		this.buffer = buffer;
+	public FriendlyByteBuffer(@NotNull ByteBuf buffer) {
+		this.buffer = Objects.requireNonNull(buffer, "Initial buffer cannot be null");
 	}
 	
 	public int readableBytes() {

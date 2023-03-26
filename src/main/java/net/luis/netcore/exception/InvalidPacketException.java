@@ -1,7 +1,5 @@
 package net.luis.netcore.exception;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  *
  * @author Luis-St
@@ -14,11 +12,11 @@ public class InvalidPacketException extends RuntimeException {
 		super();
 	}
 	
-	public InvalidPacketException(@NotNull String message) {
+	public InvalidPacketException(String message) {
 		super(message);
 	}
 	
-	public InvalidPacketException(@NotNull String message, @NotNull Throwable cause) {
+	public InvalidPacketException(String message, Throwable cause) {
 		super(message, cause);
 	}
 	

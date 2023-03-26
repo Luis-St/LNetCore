@@ -73,7 +73,8 @@ public class PacketRegistry {
 		return null;
 	}
 	
-	public static void register(Class<? extends Packet> clazz) {
+	public static void register(@NotNull Class<? extends Packet> clazz) {
+		Objects.requireNonNull(clazz, "Cannot register packet because the class is null");
 		if (PACKETS.containsValue(clazz)) {
 			LOGGER.error("Packet {} is already registered", clazz.getSimpleName());
 			return;
@@ -81,6 +82,9 @@ public class PacketRegistry {
 		if (!ReflectionHelper.hasConstructor(clazz, FriendlyByteBuffer.class)) {
 			LOGGER.error("Cannot register packet {} because it does not have a constructor with FriendlyByteBuffer as parameter", clazz.getSimpleName());
 			return;
+		}
+		if (!clazz.getSimpleName().endsWith("Packet")) {
+			LOGGER.warn("A packet should end with Packet but {} does not", clazz.getSimpleName());
 		}
 		if (PACKETS.containsKey(index)) {
 			throw new IllegalStateException("Cannot register packet " + clazz.getSimpleName() + " because the id " + index + " is already registered to packet " + PACKETS.get(index).getSimpleName());

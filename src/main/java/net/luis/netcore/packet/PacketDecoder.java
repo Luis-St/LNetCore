@@ -34,15 +34,15 @@ public class PacketDecoder extends ByteToMessageDecoder {
 			Packet packet = PacketRegistry.getPacket(id, buffer);
 			if (packet == null) {
 				LOGGER.error("Failed to get packet for id {}", id);
-				throw new IOException("Failed to get packet for id " + id);
+				throw new IllegalStateException("Failed to get packet for id " + id);
 			} else {
 				int readableBytes = buffer.readableBytes();
 				if (readableBytes > 0) {
-					LOGGER.error("Packet was too big than expected, found {} extra bytes while reading packet {} with id {}", readableBytes, packet.getClass().getSimpleName(), id);
 					if (packet.skippable()) {
+						LOGGER.warn("Packet was too big than expected, found {} extra bytes while reading packet {} with id {}", readableBytes, packet, id);
 						throw new SkipPacketException();
 					} else {
-						throw new IOException("Packet was too big than expected, found " + readableBytes + " extra bytes while reading packet " + packet.getClass().getSimpleName() + " with id " + id);
+						throw new IOException("Packet was too big than expected, found " + readableBytes + " extra bytes while reading packet " + packet + " with id " + id);
 					}
 				} else {
 					ReflectionHelper.set(Packet.class, "target", packet, target);
