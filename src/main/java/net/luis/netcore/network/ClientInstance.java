@@ -22,7 +22,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 	private Connection connection;
 	
 	public ClientInstance(String host, int port) {
-		this(host, port, (connection) -> {});
+		this(host, port, (connection) -> { });
 	}
 	
 	public ClientInstance(String host, int port, Consumer<Connection> initializeConnection) {

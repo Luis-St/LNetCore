@@ -38,8 +38,8 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
 	private final UUID uniqueId = UUID.randomUUID();
-	private final Map<Class<? extends Packet>, List<Listener>> listeners = Maps.newHashMap();
-	private  final List<Integer> registeredTargets = Lists.newArrayList();
+	private final List<Listener> listeners = Lists.newArrayList();
+	private final List<Integer> registeredTargets = Lists.newArrayList();
 	private final Channel channel;
 	
 	public Connection(Channel channel) {
@@ -183,22 +183,22 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 		} else {
 			LOGGER.debug("Adding listener {} for {} with target {} and priority {}", name, packetClass.getSimpleName(), -1 == target ? "any" : target, priority);
 		}
-		Listener listenerInstance = new Listener(name, target, (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener), priority);
-		this.listeners.putIfAbsent(packetClass, new SortedList<>(Comparator.comparingInt(Listener::priority)));
-		this.listeners.get(packetClass).add(listenerInstance);
+		this.listeners.add(new Listener(name, packetClass, target, (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener), priority));
 		if (!this.registeredTargets.contains(target)) {
 			this.registeredTargets.add(target);
 		}
 	}
 	
 	private void callListeners(@NotNull Packet packet, int target) {
-		LOGGER.debug(this.listeners);
-		List<Listener> listeners = this.listeners.getOrDefault(packet.getClass(), Lists.newArrayList());
 		boolean handled = false;
-		for (Listener listener : listeners) {
-			if (listener.target() == PacketTarget.ANY_TARGET || listener.target() == target) {
-				listener.listener().accept(this, packet);
-				handled = true;
+		this.listeners.sort(Comparator.comparingInt(Listener::priority));
+		Collections.reverse(this.listeners);
+		for (Listener listener : this.listeners) {
+			if (listener.packet().isAssignableFrom(packet.getClass())) {
+				if (listener.target() == PacketTarget.ANY_TARGET || listener.target() == target) {
+					listener.listener().accept(this, packet);
+					handled = true;
+				}
 			}
 		}
 		if (!handled) {
@@ -234,7 +234,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	//endregion
 	
 	//region Internal
-	private record Listener(String name, int target, BiConsumer<Connection, Packet> listener, int priority) implements Comparable<Listener> {
+	private record Listener(String name, Class<? extends Packet> packet, int target, BiConsumer<Connection, Packet> listener, int priority) implements Comparable<Listener> {
 		
 		@Override
 		public int compareTo(@NotNull Listener listener) {

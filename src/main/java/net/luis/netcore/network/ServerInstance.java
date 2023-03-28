@@ -29,7 +29,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 	}
 	
 	public ServerInstance(String host, int port) {
-		this(host, port, (connection) -> {});
+		this(host, port, (connection) -> { });
 	}
 	
 	public ServerInstance(String host, int port, Consumer<Connection> initializeConnection) {

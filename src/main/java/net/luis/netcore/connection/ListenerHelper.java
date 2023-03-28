@@ -37,27 +37,35 @@ class ListenerHelper {
 		StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[3];
 		try {
 			Class<?> clazz = ReflectionHelper.getClassForName(stackTrace.getClassName());
-			Method method = ReflectionHelper.getMethod(clazz, stackTrace.getMethodName());
-			if (method.isAnnotationPresent(PacketTarget.class)) {
-				return method.getAnnotation(PacketTarget.class).value();
-			} else if (clazz.isAnnotationPresent(PacketTarget.class)) {
-				return clazz.getAnnotation(PacketTarget.class).value();
-			} else {
-				return -1;
+			List<Method> methods = getMethodsForName(clazz, stackTrace.getMethodName()).stream().toList();
+			if (methods.size() == 1 && methods.get(0).isAnnotationPresent(PacketTarget.class)) {
+				return methods.get(0).getAnnotation(PacketTarget.class).value();
 			}
-		} catch (Exception | Error e) {
-			return -1;
+			if (methods.size() > 1) {
+				LOGGER.warn("Tried to get target for method {} in class {} but multiple methods with the same name were found", stackTrace.getMethodName(), stackTrace.getClassName());
+			}
+			if (clazz.isAnnotationPresent(PacketTarget.class)) {
+				
+				return clazz.getAnnotation(PacketTarget.class).value();
+			}
+		} catch (Exception | Error ignored) {
+		
 		}
+		return -1;
 	}
 	
 	static int getPriority() {
 		StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[3];
 		try {
 			Class<?> clazz = ReflectionHelper.getClassForName(stackTrace.getClassName());
-			List<Method> methods = getMethodsForName(clazz, stackTrace.getMethodName()).stream().filter(method -> method.isAnnotationPresent(PacketPriority.class)).toList();
+			List<Method> methods = getMethodsForName(clazz, stackTrace.getMethodName()).stream().toList();
 			if (methods.size() == 1 && methods.get(0).isAnnotationPresent(PacketPriority.class)) {
 				return methods.get(0).getAnnotation(PacketPriority.class).value();
-			} else if (clazz.isAnnotationPresent(PacketPriority.class)) {
+			}
+			if (methods.size() > 1) {
+				LOGGER.warn("Tried to get priority for method {} in class {} but multiple methods with the same name were found", stackTrace.getMethodName(), stackTrace.getClassName());
+			}
+			if (clazz.isAnnotationPresent(PacketPriority.class)) {
 				return clazz.getAnnotation(PacketPriority.class).value();
 			}
 		} catch (Exception | Error ignored) {
