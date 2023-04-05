@@ -1,7 +1,6 @@
 package net.luis.netcore.connection;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,11 +9,10 @@ import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketListener;
-import net.luis.netcore.packet.listener.PacketPriority;
-import net.luis.netcore.packet.listener.PacketTarget;
-import net.luis.utils.collection.SortedList;
-import net.luis.utils.util.reflection.ClassPathUtils;
-import net.luis.utils.util.reflection.ReflectionHelper;
+import net.luis.utils.util.unsafe.StackTraceUtils;
+import net.luis.utils.util.unsafe.classpath.ClassPathUtils;
+import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
+import net.luis.utils.util.unsafe.reflection.ReflectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -54,24 +52,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 		return this.channel.isOpen();
 	}
 	
-	@Override
-	protected void channelRead0(ChannelHandlerContext context, @NotNull Packet packet) {
-		try {
-			LOGGER.debug("Received packet {}", packet);
-			int target = (int) ReflectionHelper.get(Packet.class, "target", packet);
-			if (target == -1 || this.registeredTargets.contains(target)) {
-				this.callListeners(packet, target);
-			} else if (packet.skippable()) {
-				LOGGER.warn("Received packet {} with target {} but no listener is registered for this target", packet, target);
-				throw new SkipPacketException();
-			} else {
-				throw new IllegalStateException("Received packet " + packet + " with target " + target + " but no listener is registered for this target");
-			}
-		} catch (Exception e) {
-			LOGGER.warn("Fail to handle packet {}", packet);
-		}
-	}
-	
 	//region Sending packets
 	public void send(Packet packet) {
 		int target = getTarget();
@@ -92,6 +72,25 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	//endregion
 	
+	//region Netty overrides
+	@Override
+	protected void channelRead0(ChannelHandlerContext context, @NotNull Packet packet) {
+		try {
+			LOGGER.debug("Received packet {}", packet);
+			int target = (int) ReflectionHelper.get(Packet.class, "target", packet);
+			if (target == -1 || this.registeredTargets.contains(target)) {
+				this.callListeners(packet, target);
+			} else if (packet.skippable()) {
+				LOGGER.warn("Received packet {} with target {} but no listener is registered for this target", packet, target);
+				throw new SkipPacketException();
+			} else {
+				throw new IllegalStateException("Received packet " + packet + " with target " + target + " but no listener is registered for this target");
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Fail to handle {}", packet, e);
+		}
+	}
+	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
 		if (cause instanceof SkipPacketException e) {
@@ -107,83 +106,62 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 			LOGGER.error("Caught exception while channel is closed", cause);
 		}
 	}
+	//endregion
 	
 	//region Single parameter listeners
 	public void addListener(@NotNull Consumer<Packet> listener) {
-		this.addListener(getName(listener), Packet.class, -1, (connection, packet) -> listener.accept(packet), getPriority());
+		this.addListener(getName(listener), DataHolder.of(), (connection, packet) -> listener.accept(packet));
 	}
 	
-	public void addListener(int targetId, @NotNull Consumer<Packet> listener) {
-		this.addListener(getName(listener), Packet.class, targetId, (connection, packet) -> listener.accept(packet), getPriority());
+	public void addListener(int target, @NotNull Consumer<Packet> listener) {
+		this.addListener(getName(listener), DataHolder.of(target), (connection, packet) -> listener.accept(packet));
 	}
 	
-	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, int targetId, @NotNull Consumer<T> listener) {
-		this.addListener(getName(listener), packetClass, targetId, (connection, packet) -> listener.accept(packetClass.cast(packet)), getPriority());
+	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, int target, @NotNull Consumer<T> listener) {
+		this.addListener(getName(listener), DataHolder.of(packetClass, target), (connection, packet) -> listener.accept(packetClass.cast(packet)));
 	}
 	//endregion
 	
 	//region Bi parameter listeners
 	public void addListener(@NotNull BiConsumer<Connection, Packet> listener) {
-		this.addListener(getName(listener), Packet.class, PacketTarget.ANY_TARGET, listener, getPriority());
+		this.addListener(getName(listener), DataHolder.of(), listener);
 	}
 	
-	public void addListener(int targetId, @NotNull BiConsumer<Connection, Packet> listener) {
-		this.addListener(getName(listener), Packet.class, targetId, listener, getPriority());
+	public void addListener(int target, @NotNull BiConsumer<Connection, Packet> listener) {
+		this.addListener(getName(listener), DataHolder.of(target), listener);
 	}
 	
-	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, int targetId, @NotNull BiConsumer<Connection, T> listener) {
-		this.addListener(getName(listener), packetClass, targetId, listener, getPriority());
+	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, int target, @NotNull BiConsumer<Connection, T> listener) {
+		this.addListener(getName(listener), DataHolder.of(packetClass, target), listener);
 	}
 	//endregion
 	
 	//region Instance listeners
 	public void addListener(@NotNull Object listenerInstance) {
 		Class<?> clazz = listenerInstance.getClass();
-		int target = -1;
-		if (clazz.isAnnotationPresent(PacketTarget.class)) {
-			target = clazz.getAnnotation(PacketTarget.class).value();
-			if (target == -1) {
-				LOGGER.warn("If the listener instance {} is annotated with @ListenerTarget, the target should be explicitly specified", clazz.getSimpleName());
-			}
+		for (Method listener : ClassPathUtils.getAnnotatedMethods(clazz, PacketListener.class)) {
+			String name = clazz.getSimpleName() + "#" + listener.getName();
+			this.addListener(name, DataHolder.of(clazz, listener), (connection, packet) -> {
+				ReflectionHelper.invoke(listener, listenerInstance, (Object[]) ReflectionUtils.getParameters(listener, getValues(connection, packet)));
+			});
 		}
-		this.addListener(target, listenerInstance);
 	}
 	
 	public void addListener(int target, @NotNull Object listenerInstance) {
 		Class<?> clazz = listenerInstance.getClass();
-		int priority = 0;
-		if (clazz.isAnnotationPresent(PacketPriority.class)) {
-			priority = clazz.getAnnotation(PacketPriority.class).value();
-		}
 		for (Method listener : ClassPathUtils.getAnnotatedMethods(clazz, PacketListener.class)) {
-			if (listener.isAnnotationPresent(PacketTarget.class)) {
-				target = listener.getAnnotation(PacketTarget.class).value();
-				if (target == -1) {
-					LOGGER.warn("If the listener {}#{} is annotated with @ListenerTarget, the target should be explicitly specified", clazz.getSimpleName(), listener.getName());
-				}
-			}
-			if (listener.isAnnotationPresent(PacketPriority.class)) {
-				priority = listener.getAnnotation(PacketPriority.class).value();
-			}
-			PacketListener packetListener = listener.getAnnotation(PacketListener.class);
-			String name = listener.getDeclaringClass().getSimpleName() + "#" + listener.getName();
-			this.addListener(name, packetListener.value(), target, (connection, packet) -> ReflectionHelper.invoke(listener, listenerInstance, ListenerHelper.getParameters(listener, connection, packet)), priority);
+			String name = clazz.getSimpleName() + "#" + listener.getName();
+			this.addListener(name, DataHolder.of(clazz, listener).withTarget(target), (connection, packet) -> {
+				ReflectionHelper.invoke(listener, listenerInstance, (Object[]) ReflectionUtils.getParameters(listener, getValues(connection, packet)));
+			});
 		}
 	}
 	//endregion
 	
 	@SuppressWarnings("unchecked")
-	private void addListener(String name, @NotNull Class<? extends Packet> packetClass, int target, @NotNull BiConsumer<Connection, ? extends Packet> listener, int priority) {
-		if (-1 > target) {
-			LOGGER.warn("The target id of listener {} has no effect, it should be greater or equal than -1", name);
-		}
-		target = Math.max(target, PacketTarget.ANY_TARGET);
-		if (packetClass == Packet.class) {
-			LOGGER.debug("Adding listener {} with target {} and priority {}", name, -1 == target ? "any" : target, priority);
-		} else {
-			LOGGER.debug("Adding listener {} for {} with target {} and priority {}", name, packetClass.getSimpleName(), -1 == target ? "any" : target, priority);
-		}
-		this.listeners.add(new Listener(name, packetClass, target, (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener), priority));
+	private void addListener(String name, @NotNull DataHolder holder, @NotNull BiConsumer<Connection, ? extends Packet> listener) {
+		int target = holder.target();
+		this.listeners.add(new Listener(name, holder.packet(), target, (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener), holder.priority()));
 		if (!this.registeredTargets.contains(target)) {
 			this.registeredTargets.add(target);
 		}
@@ -195,7 +173,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 		Collections.reverse(this.listeners);
 		for (Listener listener : this.listeners) {
 			if (listener.packet().isAssignableFrom(packet.getClass())) {
-				if (listener.target() == PacketTarget.ANY_TARGET || listener.target() == target) {
+				if (listener.target() == PacketListener.ANY_TARGET || listener.target() == target) {
 					listener.listener().accept(this, packet);
 					handled = true;
 				}
@@ -214,10 +192,8 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	//region Object overrides
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Connection that))
-			return false;
+		if (this == o) return true;
+		if (!(o instanceof Connection that)) return false;
 		
 		return this.uniqueId.equals(that.uniqueId);
 	}
@@ -234,6 +210,55 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	//endregion
 	
 	//region Internal
+	private record DataHolder(Class<? extends Packet> packet, int target, int priority) {
+		
+		public static @NotNull DataHolder of(@NotNull Class<?> clazz, @NotNull Method method) {
+			Class<? extends Packet> packet = Packet.class;
+			int target = PacketListener.ANY_TARGET;
+			int priority = 0;
+			for (PacketListener listener : new PacketListener[] {clazz.getAnnotation(PacketListener.class), method.getAnnotation(PacketListener.class)}) {
+				if (listener == null) {
+					continue;
+				}
+				if (listener.value() != packet) {
+					packet = listener.value();
+				}
+				if (listener.target() != target) {
+					target = Math.max(listener.target(), PacketListener.ANY_TARGET);
+				}
+				if (listener.priority() != priority) {
+					priority = listener.priority();
+				}
+			}
+			return new DataHolder(packet, target, priority);
+		}
+		
+		public static @NotNull DataHolder of() {
+			return of(StackTraceUtils.getCallingClass(2), StackTraceUtils.getCallingMethod(2));
+		}
+		
+		public static @NotNull DataHolder of(Class<? extends Packet> packet) {
+			return of(StackTraceUtils.getCallingClass(2), StackTraceUtils.getCallingMethod(2)).withPacket(packet);
+		}
+		
+		public static @NotNull DataHolder of(int target) {
+			return of(StackTraceUtils.getCallingClass(2), StackTraceUtils.getCallingMethod(2)).withTarget(target);
+		}
+		
+		public static @NotNull DataHolder of(Class<? extends Packet> packet, int target) {
+			return of(StackTraceUtils.getCallingClass(2), StackTraceUtils.getCallingMethod(2)).withPacket(packet).withTarget(target);
+		}
+		
+		private @NotNull DataHolder withPacket(Class<? extends Packet> packet) {
+			return new DataHolder(packet, this.target(), this.priority());
+		}
+		
+		private @NotNull DataHolder withTarget(int target) {
+			return new DataHolder(this.packet(), target, this.priority());
+		}
+		
+	}
+	
 	private record Listener(String name, Class<? extends Packet> packet, int target, BiConsumer<Connection, Packet> listener, int priority) implements Comparable<Listener> {
 		
 		@Override
