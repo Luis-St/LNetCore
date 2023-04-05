@@ -6,7 +6,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.registry.PacketRegistry;
-import net.luis.utils.util.reflection.ReflectionHelper;
+import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

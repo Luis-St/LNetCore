@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.luis.utils.util.Utils;
-import net.luis.utils.util.reflection.ReflectionHelper;
+import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;

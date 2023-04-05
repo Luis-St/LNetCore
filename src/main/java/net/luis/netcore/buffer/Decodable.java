@@ -1,6 +1,6 @@
 package net.luis.netcore.buffer;
 
-import net.luis.utils.util.reflection.ReflectionHelper;
+import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 
 /**
