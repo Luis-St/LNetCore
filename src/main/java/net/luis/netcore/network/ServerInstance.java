@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -29,7 +30,8 @@ public class ServerInstance extends AbstractNetworkInstance {
 	}
 	
 	public ServerInstance(String host, int port) {
-		this(host, port, (connection) -> { });
+		this(host, port, (connection) -> {
+		});
 	}
 	
 	public ServerInstance(String host, int port, Consumer<Connection> initializeConnection) {
@@ -66,4 +68,24 @@ public class ServerInstance extends AbstractNetworkInstance {
 		LOGGER.info("Server closed");
 	}
 	
+	//region Object overrides
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ServerInstance that)) return false;
+		if (!super.equals(o)) return false;
+		
+		return this.connections.equals(that.connections);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), this.connections);
+	}
+	
+	@Override
+	public String toString() {
+		return "ServerInstance";
+	}
+	//endregion
 }

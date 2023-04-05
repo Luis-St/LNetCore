@@ -6,6 +6,7 @@ import net.luis.netcore.connection.Connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -22,7 +23,8 @@ public class ClientInstance extends AbstractNetworkInstance {
 	private Connection connection;
 	
 	public ClientInstance(String host, int port) {
-		this(host, port, (connection) -> { });
+		this(host, port, (connection) -> {
+		});
 	}
 	
 	public ClientInstance(String host, int port, Consumer<Connection> initializeConnection) {
@@ -56,4 +58,25 @@ public class ClientInstance extends AbstractNetworkInstance {
 		super.close();
 		LOGGER.info("Client closed");
 	}
+	
+	//region Object overrides
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ClientInstance that)) return false;
+		if (!super.equals(o)) return false;
+		
+		return Objects.equals(this.connection, that.connection);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), this.connection);
+	}
+	
+	@Override
+	public String toString() {
+		return "ClientInstance " + this.connection.getUniqueId();
+	}
+	//endregion
 }
