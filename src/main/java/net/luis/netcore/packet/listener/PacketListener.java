@@ -18,6 +18,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PacketListener {
 	
+	int ANY_TARGET = -1;
+	
 	@NotNull Class<? extends Packet> value() default Packet.class;
+	
+	int target() default ANY_TARGET;
+	
+	int priority() default 0;
 	
 }

@@ -6,6 +6,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import net.luis.utils.util.DefaultExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  *
  * @author Luis-St
@@ -50,4 +52,17 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 		this.group = null;
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof AbstractNetworkInstance that)) return false;
+		
+		if (this.port != that.port) return false;
+		return this.host.equals(that.host);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.host, this.port);
+	}
 }

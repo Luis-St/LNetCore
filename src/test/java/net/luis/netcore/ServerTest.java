@@ -5,8 +5,6 @@ import net.luis.netcore.network.ServerInstance;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.PacketListener;
-import net.luis.netcore.packet.listener.PacketPriority;
-import net.luis.netcore.packet.listener.PacketTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +24,7 @@ public class ServerTest {
 		server.open();
 	}
 	
-	@PacketTarget(2)
-	@PacketPriority(1)
+	@PacketListener(target = 1, priority = 2)
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.addListener(ServerTest::logPacket);
 		connection.addListener(0, packet -> LOGGER.debug("Received packet {} for target 0", packet));
