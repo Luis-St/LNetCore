@@ -10,6 +10,14 @@ repositories {
 	}
 }
 
+compileJava {
+	options.compilerArgs << "-parameters"
+}
+
+compileTestJava {
+	options.compilerArgs << "-parameters"
+}
+
 dependencies {
 	// Local
 	implementation "net.luis:LUtils:${LUtils}" // Utility
@@ -23,9 +31,6 @@ dependencies {
 	implementation "io.netty:netty-all:${Netty}" // Network
 	// Other
 	implementation "org.jetbrains:annotations:${JetBrainsAnnotations}" // Annotations
-	// Test
-	testImplementation "org.junit.jupiter:junit-jupiter-api:5.8.1"
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.8.1"
 }
 
 tasks.register("testClient", JavaExec) {
@@ -38,10 +43,6 @@ tasks.register("testServer", JavaExec) {
 	group = "test"
 	classpath = sourceSets.test.runtimeClasspath
 	getMainClass().set("net.luis.netcore.ServerTest")
-}
-
-test {
-	useJUnitPlatform()
 }
 
 java {
