@@ -6,7 +6,6 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.registry.PacketRegistry;
-import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +44,7 @@ public class PacketDecoder extends ByteToMessageDecoder {
 						throw new IOException("Packet was too big than expected, found " + readableBytes + " extra bytes while reading packet " + packet + " with id " + id);
 					}
 				} else {
-					ReflectionHelper.set(Packet.class, "target", packet, target);
+					packet.setTarget(target);
 					output.add(packet);
 				}
 			}
@@ -56,5 +55,4 @@ public class PacketDecoder extends ByteToMessageDecoder {
 	public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
 		LOGGER.error("Caught an exception while decoding a packet", cause);
 	}
-	
 }

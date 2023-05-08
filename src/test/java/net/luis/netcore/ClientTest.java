@@ -3,8 +3,9 @@ package net.luis.netcore;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.network.ClientInstance;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.value.StringPacket;
-import net.luis.netcore.packet.listener.PacketListener;
+import net.luis.netcore.packet.impl.value.IntegerPacket;
+import net.luis.netcore.packet.listener.PacketPriority;
+import net.luis.utils.logging.LoggingUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -20,72 +21,61 @@ public class ClientTest {
 	private static final Logger LOGGER = LogManager.getLogger(ClientTest.class);
 	
 	public static void main(String[] args) {
+		LoggingUtils.enableConsoleDebug();
 		ClientInstance client = new ClientInstance("localhost", 8080, ClientTest::initializeConnection);
 		client.open();
 		while (true) {
 			if (client.getConnection() == null) {
 				continue;
 			}
-			client.getConnection().send(1, new StringPacket("Hello World!"));
+			client.getConnection().send(1, new IntegerPacket(10));
 			break;
 		}
 	}
 	
-	@PacketListener(priority = 2)
+	@PacketPriority(priority = 11)
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.addListener(packet -> LOGGER.debug("Received packet: {}", packet));
-		connection.addListener(0, packet -> LOGGER.debug("Received packet {} for target 0", packet));
-		connection.addListener(1, (conn, packet) -> conn.send(new StringPacket("You sent packet " + packet + " to target 1")));
+		connection.addListener(packet -> LOGGER.debug("Received packet {} for target", packet));
 		connection.addListener(new Listener());
-		LOGGER.debug("Client connection initialized");
+		LOGGER.info("Client connection initialized");
 	}
 	
-	@PacketListener(priority = 2)
+	@PacketPriority(priority = 99)
 	public static class Listener {
 		
 		private static final Logger LOGGER = LogManager.getLogger(ClientTest.Listener.class);
 		
-		@PacketListener(priority = 10)
+		@PacketPriority(priority = 10)
 		public void emptyListener() {
-			LOGGER.debug("Empty listener, called first");
+			LOGGER.debug("Empty listener");
 		}
 		
-		@PacketListener(priority = 9)
-		public void singleListener(Packet packet) {
-			LOGGER.debug("Single listener with packet, called second");
+		public void singleListener(Integer target) {
+			LOGGER.debug("Single listener with target {}", target);
 		}
 		
-		@PacketListener
-		public void singleListener(Connection connection) {
-			LOGGER.debug("Single listener with connection, called last");
-		}
-		
-		@PacketListener(priority = 8)
 		public void doubleListener(Connection connection, Packet packet) {
-			LOGGER.debug("Double listener with connection and packet, called third");
+			LOGGER.debug("Double listener with connection and packet");
 		}
 		
-		@PacketListener(StringPacket.class)
 		public void doubleListener(Connection connection, String value) {
-			LOGGER.debug("Double listener with connection and value, called last");
+			LOGGER.debug("Double listener with connection and value");
 		}
 		
-		@PacketListener(value = StringPacket.class, target = 4, priority = 7)
 		public void doubleListener(Packet packet, String value) {
-			LOGGER.debug("Double listener with packet and value, called fourth");
+			LOGGER.debug("Double listener with packet and value");
 			LOGGER.info("Received StringPacket with value: {}", value);
 		}
 		
-		@PacketListener(value = StringPacket.class, priority = 3)
+		@PacketPriority(priority = 9)
 		public void tripleListener(Connection connection, Packet packet, String value) {
-			LOGGER.debug("Triple listener with connection, packet and value, called sixth");
+			LOGGER.debug("Triple listener with connection, packet and value");
 		}
 		
-		@PacketListener(value = StringPacket.class, priority = 6)
+		@PacketPriority(priority = 8)
 		public void tripleListener(String value, Connection connection, Packet packet) {
-			LOGGER.debug("Triple listener with value, connection and packet, called fifth");
+			LOGGER.debug("Triple listener with value, connection and packet");
 		}
-		
 	}
-	
 }
