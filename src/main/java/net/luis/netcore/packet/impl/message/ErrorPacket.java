@@ -41,5 +41,4 @@ public class ErrorPacket extends Packet {
 	public int getErrorCode() {
 		return this.errorCode;
 	}
-	
 }

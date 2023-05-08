@@ -13,5 +13,4 @@ interface NetworkInstance {
 	boolean isOpen();
 	
 	void close();
-	
 }

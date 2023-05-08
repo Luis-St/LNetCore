@@ -20,5 +20,4 @@ public interface Decodable {
 			throw new IllegalArgumentException("Class " + this.getClass().getName() + " has no constructor with FriendlyByteBuffer as parameter");
 		}
 	}
-	
 }

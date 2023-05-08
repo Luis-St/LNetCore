@@ -37,5 +37,4 @@ public class ObjectPacket extends Packet {
 	public <T> T getAs() {
 		return (T) this.value;
 	}
-	
 }

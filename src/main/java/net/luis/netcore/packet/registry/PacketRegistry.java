@@ -84,7 +84,7 @@ public class PacketRegistry {
 			return;
 		}
 		if (!clazz.getSimpleName().endsWith("Packet")) {
-			LOGGER.warn("A packet should end with Packet but {} does not", clazz.getSimpleName());
+			LOGGER.warn("A packet should end with 'Packet' but {} does not", clazz.getSimpleName());
 		}
 		if (PACKETS.containsKey(index)) {
 			throw new IllegalStateException("Cannot register packet " + clazz.getSimpleName() + " because the id " + index + " is already registered to packet " + PACKETS.get(index).getSimpleName());

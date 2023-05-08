@@ -186,5 +186,4 @@ public class FriendlyByteBuffer {
 	public @NotNull ByteBuf toBuffer() {
 		return this.buffer;
 	}
-	
 }

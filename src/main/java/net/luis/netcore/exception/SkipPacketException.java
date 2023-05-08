@@ -25,5 +25,4 @@ public class SkipPacketException extends EncoderException {
 	public SkipPacketException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
 }

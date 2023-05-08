@@ -35,5 +35,4 @@ public class SimpleChannelInitializer extends ChannelInitializer<Channel> {
 		pipeline.addLast("encoder", new PacketEncoder());
 		pipeline.addLast("handler", this.factory.apply(channel));
 	}
-	
 }

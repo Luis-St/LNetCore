@@ -32,5 +32,4 @@ public class InfoPacket extends Packet {
 	public String getMessage() {
 		return this.message;
 	}
-	
 }

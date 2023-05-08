@@ -19,5 +19,4 @@ public class InvalidPacketException extends RuntimeException {
 	public InvalidPacketException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
 }
