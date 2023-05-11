@@ -10,6 +10,7 @@ import net.luis.netcore.packet.PacketDecoder;
 import net.luis.netcore.packet.PacketEncoder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -18,12 +19,12 @@ import java.util.function.Function;
  *
  */
 
-public class SimpleChannelInitializer extends ChannelInitializer<Channel> {
+public final class SimpleChannelInitializer extends ChannelInitializer<Channel> {
 	
 	private final Function<Channel, Connection> factory;
 	
 	public SimpleChannelInitializer(Function<Channel, Connection> factory) {
-		this.factory = factory;
+		this.factory = Objects.requireNonNull(factory, "Factory must not be null");
 	}
 	
 	@Override

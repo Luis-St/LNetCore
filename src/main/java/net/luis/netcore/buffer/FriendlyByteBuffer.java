@@ -8,6 +8,7 @@ import net.luis.utils.util.Utils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
  *
  */
 
-public class FriendlyByteBuffer {
+public final class FriendlyByteBuffer {
 	
 	private final ByteBuf buffer;
 	
@@ -30,7 +31,7 @@ public class FriendlyByteBuffer {
 		this(Unpooled.buffer());
 	}
 	
-	public FriendlyByteBuffer(@NotNull ByteBuf buffer) {
+	public FriendlyByteBuffer(ByteBuf buffer) {
 		this.buffer = Objects.requireNonNull(buffer, "Initial buffer cannot be null");
 	}
 	
@@ -59,8 +60,8 @@ public class FriendlyByteBuffer {
 		this.buffer.writeBoolean(value);
 	}
 	
-	public <T extends Enum<T>> void writeEnum(@NotNull T value) {
-		this.writeInt(value.ordinal());
+	public <T extends Enum<T>> void writeEnum(T value) {
+		this.writeInt(Objects.requireNonNull(value, "Enum must not be null").ordinal());
 	}
 	//endregion
 	
@@ -81,35 +82,39 @@ public class FriendlyByteBuffer {
 		return this.buffer.readBoolean();
 	}
 	
-	public <T extends Enum<T>> @NotNull T readEnum(@NotNull Class<T> clazz) {
+	public <T extends Enum<T>> @NotNull T readEnum(Class<T> clazz) {
 		int ordinal = this.readInt();
-		return clazz.getEnumConstants()[ordinal];
+		return Objects.requireNonNull(clazz, "Enum class must not be null").getEnumConstants()[ordinal];
 	}
 	//endregion
 	
 	//region Write built-in types
-	public void writeString(@NotNull String value) {
+	public void writeString(String value) {
+		Objects.requireNonNull(value, "String must not be null");
 		this.buffer.writeInt(value.length());
-		this.buffer.writeCharSequence(value, StandardCharsets.UTF_8);
+		this.buffer.writeCharSequence(value, Charset.defaultCharset());
 	}
 	
-	public void writeUUID(@NotNull UUID value) {
+	public void writeUUID(UUID value) {
+		Objects.requireNonNull(value, "UUID must not be null");
 		this.writeLong(value.getMostSignificantBits());
 		this.writeLong(value.getLeastSignificantBits());
 	}
 	
-	public <T> void writeList(@NotNull List<T> list, @NotNull Consumer<T> encoder) {
+	public <T> void writeList(List<T> list, Consumer<T> encoder) {
+		Objects.requireNonNull(list, "List must not be null");
 		this.writeInt(list.size());
 		for (T t : list) {
-			encoder.accept(t);
+			Objects.requireNonNull(encoder, "Encoder must not be null").accept(t);
 		}
 	}
 	
-	public <K, V> void writeMap(@NotNull Map<K, V> map, @NotNull Consumer<K> keyEncoder, @NotNull Consumer<V> valueEncoder) {
+	public <K, V> void writeMap(Map<K, V> map, Consumer<K> keyEncoder, Consumer<V> valueEncoder) {
+		Objects.requireNonNull(map, "Map must not be null");
 		this.writeInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
-			keyEncoder.accept(entry.getKey());
-			valueEncoder.accept(entry.getValue());
+			Objects.requireNonNull(keyEncoder, "Key encoder must not be null").accept(entry.getKey());
+			Objects.requireNonNull(valueEncoder, "Value encoder must not be null").accept(entry.getValue());
 		}
 	}
 	//endregion
@@ -127,21 +132,21 @@ public class FriendlyByteBuffer {
 		return uuid.equals(Utils.EMPTY_UUID) ? Utils.EMPTY_UUID : uuid;
 	}
 	
-	public <T> @NotNull List<T> readList(@NotNull Supplier<T> decoder) {
+	public <T> @NotNull List<T> readList(Supplier<T> decoder) {
 		List<T> list = Lists.newArrayList();
 		int size = this.readInt();
 		for (int i = 0; i < size; i++) {
-			list.add(decoder.get());
+			list.add(Objects.requireNonNull(decoder, "Decoder must not be null").get());
 		}
 		return list;
 	}
 	
-	public <K, V> @NotNull Map<K, V> readMap(@NotNull Supplier<K> keyDecoder, @NotNull Supplier<V> valueDecoder) {
+	public <K, V> @NotNull Map<K, V> readMap(Supplier<K> keyDecoder, Supplier<V> valueDecoder) {
 		Map<K, V> map = Maps.newHashMap();
 		int size = this.buffer.readInt();
 		for (int i = 0; i < size; i++) {
-			K key = keyDecoder.get();
-			V value = valueDecoder.get();
+			K key = Objects.requireNonNull(keyDecoder, "Key decoder must not be null").get();
+			V value = Objects.requireNonNull(valueDecoder, "Value decoder must not be null").get();
 			map.put(key, value);
 		}
 		return map;
@@ -149,25 +154,28 @@ public class FriendlyByteBuffer {
 	//endregion
 	
 	//region Write objects
-	public <T extends Encodable & Decodable> void write(@NotNull T object) {
+	public <T extends Encodable & Decodable> void write(T object) {
+		Objects.requireNonNull(object, "Object must not be null");
 		object.validate();
 		object.encode(this);
 	}
 	
-	public void writeUnsafe(@NotNull Object object) {
+	public void writeUnsafe(Object object) {
+		Objects.requireNonNull(object, "Object must not be null");
 		this.writeString(object.getClass().getName());
 		this.write((Encodable & Decodable) object);
 	}
 	
-	public <T extends Encodable & Decodable> void writeInterface(@NotNull T value) {
+	public <T extends Encodable & Decodable> void writeInterface(T value) {
+		Objects.requireNonNull(value, "Value must not be null");
 		this.writeString(value.getClass().getName());
 		this.write(value);
 	}
 	//endregion
 	
 	//region Read objects
-	public <T extends Encodable & Decodable> T read(@NotNull Class<T> clazz) {
-		return Decodable.decode(clazz, this);
+	public <T extends Encodable & Decodable> T read(Class<T> clazz) {
+		return Decodable.decode(Objects.requireNonNull(clazz, "Class must not be null"), this);
 	}
 	
 	@SuppressWarnings("unchecked")

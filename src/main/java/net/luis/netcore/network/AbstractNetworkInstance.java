@@ -16,6 +16,19 @@ import java.util.Objects;
 
 abstract class AbstractNetworkInstance implements NetworkInstance {
 	
+	/*
+	 * TODO:
+	 *  - Add closeOn(Event)
+	 *  - Add closeOnDisconnect()
+	 *  - Add closeOnResponse()
+	 *  - Add closeAfterPackets(int)
+	 *  - Add closeOnReceive(Class<? extends Packet>)
+	 *  - Add closeOnTimeout(int)
+	 *  - Implement these functions using a NetworkInstanceHandler (can handle multiple Events)
+	 *  - Add EventSystem for NetworkInstance (ResponseEvent, TimeoutEvent, PacketEvent,
+	 *  to Client and Server
+	 */
+	
 	private final String host;
 	private final int port;
 	private EventLoopGroup group;
@@ -28,11 +41,11 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 		this.port = port;
 	}
 	
-	protected @NotNull String getHost() {
+	protected final @NotNull String getHost() {
 		return this.host;
 	}
 	
-	protected int getPort() {
+	protected final int getPort() {
 		return this.port;
 	}
 	

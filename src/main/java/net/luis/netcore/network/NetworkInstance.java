@@ -12,5 +12,5 @@ interface NetworkInstance {
 	
 	boolean isOpen();
 	
-	void close();
+	void closeNow();
 }

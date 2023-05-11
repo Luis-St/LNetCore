@@ -18,7 +18,7 @@ import java.io.IOException;
  *
  */
 
-public class PacketEncoder extends MessageToByteEncoder<Packet> {
+public final class PacketEncoder extends MessageToByteEncoder<Packet> {
 	
 	private static final Logger LOGGER = LogManager.getLogger(PacketEncoder.class);
 	

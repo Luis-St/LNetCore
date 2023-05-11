@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Decodable {
 	
-	static <T extends Decodable> T decode(@NotNull Class<T> clazz, @NotNull FriendlyByteBuffer buffer) {
+	static <T extends Decodable> T decode(Class<T> clazz, FriendlyByteBuffer buffer) {
 		return ReflectionHelper.newInstance(clazz, buffer);
 	}
 	

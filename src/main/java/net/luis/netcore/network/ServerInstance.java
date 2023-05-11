@@ -61,10 +61,10 @@ public class ServerInstance extends AbstractNetworkInstance {
 	}
 	
 	@Override
-	public void close() {
+	public void closeNow() {
 		this.connections.forEach(Connection::close);
 		this.connections.clear();
-		super.close();
+		super.closeNow();
 		LOGGER.info("Server closed");
 	}
 	

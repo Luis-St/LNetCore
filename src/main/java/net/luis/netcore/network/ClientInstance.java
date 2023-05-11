@@ -52,10 +52,10 @@ public class ClientInstance extends AbstractNetworkInstance {
 	}
 	
 	@Override
-	public void close() {
+	public void closeNow() {
 		this.connection.close();
 		this.connection = null;
-		super.close();
+		super.closeNow();
 		LOGGER.info("Client closed");
 	}
 	

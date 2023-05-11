@@ -19,7 +19,7 @@ import java.util.List;
  *
  */
 
-public class PacketDecoder extends ByteToMessageDecoder {
+public final class PacketDecoder extends ByteToMessageDecoder {
 	
 	private static final Logger LOGGER = LogManager.getLogger(PacketDecoder.class);
 	

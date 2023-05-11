@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -25,14 +26,14 @@ class ListenerHelper {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ListenerHelper.class);
 	
-	static @NotNull String getName(@NotNull Object listener) {
-		return listener.toString().split("/")[0].replace("$$", "$");
+	static @NotNull String getName(Object listener) {
+		return Objects.requireNonNull(listener, "Listener must not be null").toString().split("/")[0].replace("$$", "$");
 	}
 	
-	static @NotNull List<ValueInfo> getValues(@NotNull Connection connection, @NotNull Packet packet) {
+	static @NotNull List<ValueInfo> getValues(Connection connection, Packet packet) {
 		List<ValueInfo> values = Lists.newArrayList();
-		values.add(new ValueInfo(connection, "connection", Nullability.NOT_NULL));
-		values.add(new ValueInfo(packet, "packet", Nullability.NOT_NULL));
+		values.add(new ValueInfo(Objects.requireNonNull(connection, "Connection must not be null"), "connection", Nullability.NOT_NULL));
+		values.add(new ValueInfo(Objects.requireNonNull(packet, "Packet must not be null"), "packet", Nullability.NOT_NULL));
 		values.add(new ValueInfo(packet.getTarget(), "target", Nullability.NOT_NULL));
 		for (Method method : ClassPathUtils.getAnnotatedMethods(packet.getClass(), PacketGetter.class)) {
 			PacketGetter getter = method.getAnnotation(PacketGetter.class);

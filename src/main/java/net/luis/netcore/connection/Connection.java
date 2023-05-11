@@ -68,7 +68,8 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	//region Netty overrides
 	@Override
-	protected void channelRead0(ChannelHandlerContext context, @NotNull Packet packet) {
+	protected void channelRead0(ChannelHandlerContext context, Packet packet) {
+		Objects.requireNonNull(packet, "Packet must not be null");
 		try {
 			LOGGER.debug("Received packet {}", packet);
 			this.callListeners(packet);
@@ -95,28 +96,34 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	//endregion
 	
 	//region Single parameter listeners
-	public void addListener(@NotNull Consumer<Packet> listener) {
-		this.addListener(getName(listener), DataHolder.of(), (connection, packet) -> listener.accept(packet));
+	public void addListener(Consumer<Packet> action) {
+		Objects.requireNonNull(action, "Action must not be null");
+		this.addListener(getName(action), DataHolder.of(), (connection, packet) -> action.accept(packet));
 	}
 	
-	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, @NotNull Consumer<T> listener) {
-		this.addListener(getName(listener), DataHolder.of(packetClass), (connection, packet) -> listener.accept(packetClass.cast(packet)));
+	public <T extends Packet> void addListener(Class<T> packetClass, Consumer<T> action) {
+		Objects.requireNonNull(packetClass, "Packet class must not be null");
+		Objects.requireNonNull(action, "Action must not be null");
+		this.addListener(getName(action), DataHolder.of(packetClass), (connection, packet) -> action.accept(packetClass.cast(packet)));
 	}
 	//endregion
 	
 	//region Bi parameter listeners
-	public void addListener(@NotNull BiConsumer<Connection, Packet> listener) {
-		this.addListener(getName(listener), DataHolder.of(), listener);
+	public void addListener(BiConsumer<Connection, Packet> action) {
+		Objects.requireNonNull(action, "Action must not be null");
+		this.addListener(getName(action), DataHolder.of(), action);
 	}
 	
-	public <T extends Packet> void addListener(@NotNull Class<T> packetClass, @NotNull BiConsumer<Connection, T> listener) {
-		this.addListener(getName(listener), DataHolder.of(packetClass), listener);
+	public <T extends Packet> void addListener(Class<T> packetClass, BiConsumer<Connection, T> action) {
+		Objects.requireNonNull(packetClass, "Packet class must not be null");
+		Objects.requireNonNull(action, "Action must not be null");
+		this.addListener(getName(action), DataHolder.of(packetClass), action);
 	}
 	//endregion
 	
 	//region Instance listeners
-	public void addListener(@NotNull Object listenerInstance) {
-		Class<?> clazz = listenerInstance.getClass();
+	public void addListener(Object listenerInstance) {
+		Class<?> clazz = Objects.requireNonNull(listenerInstance, "Listener must not be null").getClass();
 		for (Method listener : clazz.getDeclaredMethods()) {
 			if (!Modifier.isPublic(listener.getModifiers())) {
 				continue;
@@ -136,17 +143,19 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 		}
 	}
 	
-	private Object[] getParameters(Method listener, @NotNull Connection connection, @NotNull Packet packet) {
+	private Object[] getParameters(Method listener, Connection connection, Packet packet) {
 		return ReflectionUtils.getParameters(listener, getValues(connection, packet));
 	}
 	//endregion
 	
 	@SuppressWarnings("unchecked")
-	private void addListener(String name, @NotNull DataHolder holder, @NotNull BiConsumer<Connection, ? extends Packet> listener) {
-		this.listeners.add(new Listener(name, holder.packet(), (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener), holder.priority()));
+	private void addListener(String name, DataHolder holder, BiConsumer<Connection, ? extends Packet> listener) {
+		Objects.requireNonNull(holder, "Holder must not be null");
+		this.listeners.add(new Listener(name, holder.packet(), (BiConsumer<Connection, Packet>) Objects.requireNonNull(listener, "Listener must not be null"), holder.priority()));
 	}
 	
-	private void callListeners(@NotNull Packet packet) {
+	private void callListeners(Packet packet) {
+		Objects.requireNonNull(packet, "Packet must not be null");
 		boolean handled = false;
 		this.listeners.sort(Comparator.comparingInt(Listener::priority));
 		Collections.reverse(this.listeners);
@@ -189,7 +198,9 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	//region Internal
 	private record DataHolder(Class<? extends Packet> packet, int priority) {
 		
-		public static @NotNull DataHolder of(@NotNull Class<?> clazz, @NotNull Method method) {
+		public static @NotNull DataHolder of(Class<?> clazz, Method method) {
+			Objects.requireNonNull(clazz, "Class must not be null");
+			Objects.requireNonNull(method, "Method must not be null");
 			Class<? extends Packet> packet = Packet.class;
 			int priority = 0;
 			for (PacketPriority listener : new PacketPriority[] {clazz.getAnnotation(PacketPriority.class), method.getAnnotation(PacketPriority.class)}) {
@@ -217,7 +228,12 @@ public class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	private record Listener(String name, Class<? extends Packet> packet, BiConsumer<Connection, Packet> listener, int priority) {
-	
+		
+		public Listener {
+			Objects.requireNonNull(name, "Name must not be null");
+			Objects.requireNonNull(packet, "Packet class must not be null");
+			Objects.requireNonNull(listener, "Listener must not be null");
+		}
 	}
 	//endregion
 }
