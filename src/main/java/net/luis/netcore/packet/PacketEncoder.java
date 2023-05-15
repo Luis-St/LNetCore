@@ -31,18 +31,18 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
 		} else {
 			FriendlyByteBuffer buffer = new FriendlyByteBuffer(output);
 			buffer.writeInt(id);
-			buffer.writeInt(packet.getTarget());
+			buffer.write(packet.getTarget());
 			try {
 				int startSize = buffer.writerIndex();
 				packet.encode(buffer);
 				int size = buffer.writerIndex() - startSize;
 				if (size > 8000000) {
 					LOGGER.error("Packet {} is too big", packet.getClass().getSimpleName());
-					throw new IllegalArgumentException("Packet " + packet.getClass().getSimpleName() + " is too big, it should be less than 8388608, but it is " + size);
+					throw new IllegalArgumentException("Packet " + packet.getClass().getSimpleName() + " is too big, it should be less than 8MB, but it is " + size);
 				}
 			} catch (Exception e) {
 				if (packet.skippable()) {
-					LOGGER.warn("Fail to encode packet {} with id {}, since it is not skippable", packet, id);
+					LOGGER.warn("Fail to encode packet {} with id {}", packet, id);
 					throw new SkipPacketException(e);
 				} else {
 					LOGGER.error("Fail to encode packet {} with id {}, since it is not skippable", packet, id);

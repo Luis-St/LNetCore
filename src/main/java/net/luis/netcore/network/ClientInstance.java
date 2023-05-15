@@ -2,7 +2,8 @@ package net.luis.netcore.network;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.Connection;
+import net.luis.netcore.network.connection.Connection;
+import net.luis.netcore.packet.Packet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +22,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	private final Consumer<Connection> initializeConnection;
 	private Connection connection;
+	private Packet handshake;
 	
 	public ClientInstance(String host, int port) {
 		this(host, port, (connection) -> {
@@ -33,12 +35,19 @@ public class ClientInstance extends AbstractNetworkInstance {
 	}
 	
 	@Override
+	public ClientInstance handshake(Packet packet) {
+		this.handshake = packet;
+		return this;
+	}
+	
+	@Override
 	public void open() {
 		try {
 			LOGGER.info("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
-				this.connection = new Connection(channel);
+				this.connection = new Connection(channel, this.handshake);
 				this.initializeConnection.accept(this.connection);
+				this.initialized = true;
 				return this.connection;
 			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();
 			LOGGER.info("Client successfully started on {}:{}", this.getHost(), this.getPort());
@@ -47,14 +56,17 @@ public class ClientInstance extends AbstractNetworkInstance {
 		}
 	}
 	
-	public Connection getConnection() {
-		return this.connection;
+	@Override
+	public void send(Packet packet) {
+		this.connection.send(packet);
 	}
 	
 	@Override
 	public void closeNow() {
-		this.connection.close();
-		this.connection = null;
+		if (this.connection != null) {
+			this.connection.close();
+			this.connection = null;
+		}
 		super.closeNow();
 		LOGGER.info("Client closed");
 	}

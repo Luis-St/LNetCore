@@ -16,26 +16,15 @@ import java.util.Objects;
 
 abstract class AbstractNetworkInstance implements NetworkInstance {
 	
-	/*
-	 * TODO:
-	 *  - Add closeOn(Event)
-	 *  - Add closeOnDisconnect()
-	 *  - Add closeOnResponse()
-	 *  - Add closeAfterPackets(int)
-	 *  - Add closeOnReceive(Class<? extends Packet>)
-	 *  - Add closeOnTimeout(int)
-	 *  - Implement these functions using a NetworkInstanceHandler (can handle multiple Events)
-	 *  - Add EventSystem for NetworkInstance (ResponseEvent, TimeoutEvent, PacketEvent,
-	 *  to Client and Server
-	 */
-	
 	private final String host;
 	private final int port;
+	protected boolean initialized = false;
 	private EventLoopGroup group;
 	
 	public AbstractNetworkInstance(String host, int port) {
-		if (host == null || host.isEmpty()) {
-			throw new IllegalArgumentException("Host cannot be null or empty");
+		Objects.requireNonNull(host, "Host must not be null");
+		if (host.isEmpty()) {
+			throw new IllegalArgumentException("Host must not be empty");
 		}
 		this.host = "localhost".equalsIgnoreCase(host) ? "127.0.0.1" : host;
 		this.port = port;
@@ -49,22 +38,23 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 		return this.port;
 	}
 	
-	protected final @NotNull EventLoopGroup buildGroup(String nameFormat) {
-		this.group = new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat(nameFormat).setUncaughtExceptionHandler(new DefaultExceptionHandler()).build());
+	protected final @NotNull EventLoopGroup buildGroup(String name) {
+		this.group = new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat(name).setUncaughtExceptionHandler(new DefaultExceptionHandler()).build());
 		return this.group;
 	}
 	
 	@Override
 	public final boolean isOpen() {
-		return this.group != null && !this.group.isShuttingDown();
+		return this.initialized && this.group != null && !this.group.isShuttingDown();
 	}
 	
 	@Override
-	public void close() {
+	public void closeNow() {
 		this.group.shutdownGracefully();
 		this.group = null;
 	}
 	
+	//region Object overrides
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -78,4 +68,5 @@ abstract class AbstractNetworkInstance implements NetworkInstance {
 	public int hashCode() {
 		return Objects.hash(this.host, this.port);
 	}
+	//endregion
 }

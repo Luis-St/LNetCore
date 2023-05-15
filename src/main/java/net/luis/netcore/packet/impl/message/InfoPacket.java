@@ -2,7 +2,6 @@ package net.luis.netcore.packet.impl.message;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.listener.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,7 +27,6 @@ public class InfoPacket extends Packet {
 		buffer.writeString(this.message);
 	}
 	
-	@PacketGetter
 	public String getMessage() {
 		return this.message;
 	}

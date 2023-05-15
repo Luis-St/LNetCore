@@ -154,19 +154,21 @@ public final class FriendlyByteBuffer {
 	//endregion
 	
 	//region Write objects
-	public <T extends Encodable & Decodable> void write(T object) {
+	public <T extends Encodable> void write(T object) {
 		Objects.requireNonNull(object, "Object must not be null");
-		object.validate();
+		if (object instanceof Decodable decodable) {
+			decodable.validate();
+		}
 		object.encode(this);
 	}
 	
 	public void writeUnsafe(Object object) {
 		Objects.requireNonNull(object, "Object must not be null");
 		this.writeString(object.getClass().getName());
-		this.write((Encodable & Decodable) object);
+		this.write((Encodable) object);
 	}
 	
-	public <T extends Encodable & Decodable> void writeInterface(T value) {
+	public <T extends Encodable> void writeInterface(T value) {
 		Objects.requireNonNull(value, "Value must not be null");
 		this.writeString(value.getClass().getName());
 		this.write(value);

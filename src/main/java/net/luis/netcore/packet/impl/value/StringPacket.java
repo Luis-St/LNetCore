@@ -2,7 +2,6 @@ package net.luis.netcore.packet.impl.value;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.listener.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,7 +27,6 @@ public class StringPacket extends Packet {
 		buffer.writeString(this.value);
 	}
 	
-	@PacketGetter(parameterName = "value")
 	public String get() {
 		return this.value;
 	}

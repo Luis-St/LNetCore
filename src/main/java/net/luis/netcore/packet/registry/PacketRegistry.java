@@ -40,7 +40,8 @@ public class PacketRegistry {
 		return null;
 	}
 	
-	public static int getId(@NotNull Class<? extends Packet> clazz) {
+	public static int getId(Class<? extends Packet> clazz) {
+		Objects.requireNonNull(clazz, "Packet class must not be null");
 		for (Map.Entry<Integer, Class<? extends Packet>> entry : PACKETS.entrySet()) {
 			if (entry.getValue() == clazz) {
 				return entry.getKey();
@@ -73,7 +74,7 @@ public class PacketRegistry {
 		return null;
 	}
 	
-	public static void register(@NotNull Class<? extends Packet> clazz) {
+	public static void register(Class<? extends Packet> clazz) {
 		Objects.requireNonNull(clazz, "Cannot register packet because the class is null");
 		if (PACKETS.containsValue(clazz)) {
 			LOGGER.error("Packet {} is already registered", clazz.getSimpleName());
