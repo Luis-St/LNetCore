@@ -7,6 +7,8 @@ import net.luis.netcore.packet.listener.PacketTarget;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  *
  * @author Luis-St
@@ -43,6 +45,10 @@ public abstract class Packet implements Encodable, Decodable {
 	
 	public Packet withTarget(int target) {
 		return this.withTarget(PacketTarget.of(target));
+	}
+	
+	public <T> T getWrapped(PacketWrapper<T> wrapper) {
+		return Objects.requireNonNull(wrapper, "Wrapper must not be null").wrap(this);
 	}
 	
 	//region Object overrides
