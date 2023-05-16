@@ -10,6 +10,9 @@ import net.luis.netcore.packet.impl.action.HandshakePacket;
 import net.luis.netcore.packet.impl.message.ErrorPacket;
 import net.luis.netcore.packet.impl.message.InfoPacket;
 import net.luis.netcore.packet.impl.value.*;
+import net.luis.netcore.packet.impl.values.ListPacket;
+import net.luis.netcore.packet.impl.values.MapPacket;
+import net.luis.netcore.packet.impl.values.ValuesPacket;
 import net.luis.utils.util.unsafe.classpath.ClassPathUtils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
@@ -109,6 +112,9 @@ public class PacketRegistry {
 		register(LongPacket.class);
 		register(ObjectPacket.class);
 		register(StringPacket.class);
+		register(ListPacket.class);
+		register(MapPacket.class);
+		register(ValuesPacket.class);
 		ClassPathUtils.getAnnotatedClasses(AutoPacket.class).stream().filter(clazz -> {
 			if (Packet.class.isAssignableFrom(clazz)) {
 				return true;
