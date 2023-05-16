@@ -8,7 +8,7 @@ import net.luis.netcore.packet.Packet;
  *
  */
 
-interface NetworkInstance {
+public interface NetworkInstance {
 	
 	NetworkInstance handshake(Packet packet);
 	

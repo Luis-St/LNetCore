@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -68,6 +69,10 @@ public class ServerInstance extends AbstractNetworkInstance {
 	@Override
 	public void send(Packet packet) {
 		this.connections.forEach(connection -> connection.send(packet));
+	}
+	
+	public void send(UUID uniqueId, Packet packet) {
+		this.connections.stream().filter(connection -> connection.getUniqueId().equals(uniqueId)).forEach(connection -> connection.send(packet));
 	}
 	
 	@Override
