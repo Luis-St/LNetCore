@@ -4,9 +4,11 @@ import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.impl.action.EmptyPacket;
 import net.luis.netcore.packet.impl.action.HandshakePacket;
 import net.luis.netcore.packet.impl.message.ErrorPacket;
+import net.luis.netcore.packet.impl.message.InfoPacket;
 import net.luis.netcore.packet.impl.value.*;
 import net.luis.utils.util.unsafe.classpath.ClassPathUtils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
@@ -95,14 +97,18 @@ public class PacketRegistry {
 	}
 	
 	static {
+		register(CloseConnectionPacket.class);
 		register(EmptyPacket.class);
+		register(HandshakePacket.class);
+		register(InfoPacket.class);
+		register(ErrorPacket.class);
+		register(IntegerPacket.class);
+		register(BooleanPacket.class);
+		register(DoublePacket.class);
 		register(IntegerPacket.class);
 		register(LongPacket.class);
-		register(DoublePacket.class);
-		register(StringPacket.class);
 		register(ObjectPacket.class);
-		register(HandshakePacket.class);
-		register(ErrorPacket.class);
+		register(StringPacket.class);
 		ClassPathUtils.getAnnotatedClasses(AutoPacket.class).stream().filter(clazz -> {
 			if (Packet.class.isAssignableFrom(clazz)) {
 				return true;

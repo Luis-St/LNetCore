@@ -4,7 +4,6 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -13,24 +12,24 @@ import java.util.function.Supplier;
  *
  */
 
-public class IntegerPacket extends Packet {
+public class BooleanPacket extends Packet {
 	
-	private final int value;
+	private final boolean value;
 	
-	public IntegerPacket(int value) {
+	public BooleanPacket(boolean value) {
 		this.value = value;
 	}
 	
-	public IntegerPacket(@NotNull FriendlyByteBuffer buffer) {
-		this.value = buffer.readInt();
+	public BooleanPacket(@NotNull FriendlyByteBuffer buffer) {
+		this.value = buffer.readBoolean();
 	}
 	
 	@Override
 	public void encode(@NotNull FriendlyByteBuffer buffer) {
-		buffer.writeInt(this.value);
+		buffer.writeBoolean(this.value);
 	}
 	
-	public int get() {
+	public boolean get() {
 		return this.value;
 	}
 }

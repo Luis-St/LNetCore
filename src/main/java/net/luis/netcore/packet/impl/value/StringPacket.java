@@ -4,13 +4,15 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Supplier;
+
 /**
  *
  * @author Luis-St
  *
  */
 
-public class StringPacket extends Packet {
+public class StringPacket extends Packet implements Supplier<String> {
 	
 	private final String value;
 	
@@ -27,6 +29,7 @@ public class StringPacket extends Packet {
 		buffer.writeString(this.value);
 	}
 	
+	@Override
 	public String get() {
 		return this.value;
 	}
