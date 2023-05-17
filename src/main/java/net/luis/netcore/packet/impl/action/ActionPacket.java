@@ -10,13 +10,13 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class HandshakePacket extends Packet {
+public class ActionPacket extends Packet {
 	
-	public HandshakePacket() {
+	public ActionPacket() {
 	
 	}
 	
-	public HandshakePacket(@NotNull FriendlyByteBuffer buffer) {
+	public ActionPacket(@NotNull FriendlyByteBuffer buffer) {
 	
 	}
 	

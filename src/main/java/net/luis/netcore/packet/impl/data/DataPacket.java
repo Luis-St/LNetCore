@@ -1,7 +1,7 @@
-package net.luis.netcore.packet.impl.values;
+package net.luis.netcore.packet.impl.data;
 
-import net.luis.netcore.buffer.Decodable;
-import net.luis.netcore.buffer.Encodable;
+import net.luis.netcore.buffer.decode.Decodable;
+import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
@@ -15,16 +15,16 @@ import java.util.function.Supplier;
  *
  */
 
-public class ValuesPacket extends Packet implements Supplier<Object[]> {
+public class DataPacket extends Packet implements Supplier<Object[]> {
 	
 	private final Object[] values;
 	
 	@SafeVarargs
-	public <T extends Encodable & Decodable> ValuesPacket(T... values) {
+	public <T extends Encodable & Decodable> DataPacket(T... values) {
 		this.values = values;
 	}
 	
-	public ValuesPacket(@NotNull FriendlyByteBuffer buffer) {
+	public DataPacket(@NotNull FriendlyByteBuffer buffer) {
 		this.values = buffer.readList(buffer::readUnsafe).toArray();
 	}
 	

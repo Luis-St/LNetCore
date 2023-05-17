@@ -10,13 +10,13 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-public class EmptyPacket extends Packet {
+public class InitializeConnectionPacket extends Packet {
 	
-	public EmptyPacket() {
+	public InitializeConnectionPacket() {
 	
 	}
 	
-	public EmptyPacket(@NotNull FriendlyByteBuffer buffer) {
+	public InitializeConnectionPacket(@NotNull FriendlyByteBuffer buffer) {
 	
 	}
 	

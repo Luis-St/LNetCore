@@ -4,15 +4,15 @@ import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.impl.action.ActionPacket;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
-import net.luis.netcore.packet.impl.action.EmptyPacket;
-import net.luis.netcore.packet.impl.action.HandshakePacket;
+import net.luis.netcore.packet.impl.action.InitializeConnectionPacket;
+import net.luis.netcore.packet.impl.data.DataPacket;
+import net.luis.netcore.packet.impl.data.ListPacket;
+import net.luis.netcore.packet.impl.data.MapPacket;
 import net.luis.netcore.packet.impl.message.ErrorPacket;
 import net.luis.netcore.packet.impl.message.InfoPacket;
 import net.luis.netcore.packet.impl.value.*;
-import net.luis.netcore.packet.impl.values.ListPacket;
-import net.luis.netcore.packet.impl.values.MapPacket;
-import net.luis.netcore.packet.impl.values.ValuesPacket;
 import net.luis.utils.util.unsafe.classpath.ClassPathUtils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +35,10 @@ public class PacketRegistry {
 	private static final Logger LOGGER = LogManager.getLogger(PacketRegistry.class);
 	private static final Map<Integer, Class<? extends Packet>> PACKETS = Maps.newHashMap();
 	private static int index;
+	
+	public static void initialize() {
+	
+	}
 	
 	public static Class<? extends Packet> byId(int id) {
 		Class<? extends Packet> clazz = PACKETS.get(id);
@@ -100,9 +104,12 @@ public class PacketRegistry {
 	}
 	
 	static {
+		register(ActionPacket.class);
 		register(CloseConnectionPacket.class);
-		register(EmptyPacket.class);
-		register(HandshakePacket.class);
+		register(InitializeConnectionPacket.class);
+		register(DataPacket.class);
+		register(ListPacket.class);
+		register(MapPacket.class);
 		register(InfoPacket.class);
 		register(ErrorPacket.class);
 		register(IntegerPacket.class);
@@ -112,9 +119,6 @@ public class PacketRegistry {
 		register(LongPacket.class);
 		register(ObjectPacket.class);
 		register(StringPacket.class);
-		register(ListPacket.class);
-		register(MapPacket.class);
-		register(ValuesPacket.class);
 		ClassPathUtils.getAnnotatedClasses(AutoPacket.class).stream().filter(clazz -> {
 			if (Packet.class.isAssignableFrom(clazz)) {
 				return true;
