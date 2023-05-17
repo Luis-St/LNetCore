@@ -22,8 +22,8 @@ public class ServerTest {
 	
 	public static void main(String[] args) {
 		LoggingUtils.enableConsoleDebug();
-		ServerInstance server = new ServerInstance("localhost", 8080, ServerTest::initializeConnection);
-		server.open();
+		ServerInstance server = new ServerInstance(ServerTest::initializeConnection);
+		server.open("localhost", 8080);
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {

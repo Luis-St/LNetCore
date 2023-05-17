@@ -4,12 +4,14 @@ import com.google.common.collect.Lists;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.luis.netcore.network.connection.Connection;
+import net.luis.netcore.network.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -24,38 +26,25 @@ public class ServerInstance extends AbstractNetworkInstance {
 	private static final Logger LOGGER = LogManager.getLogger(ServerInstance.class);
 	
 	private final List<Connection> connections = Lists.newArrayList();
-	private final Consumer<Connection> initializeConnection;
-	private Packet handshake;
+	private final ConnectionInitializer initializer;
 	
-	public ServerInstance(int port) {
-		this("localhost", port);
+	public ServerInstance() {
+		this((connection) -> {});
 	}
 	
-	public ServerInstance(String host, int port) {
-		this(host, port, (connection) -> {
-		});
-		this.initialized = true;
-	}
-	
-	public ServerInstance(String host, int port, Consumer<Connection> initializeConnection) {
-		super(host, port);
-		this.initializeConnection = initializeConnection;
+	public ServerInstance(ConnectionInitializer initializer) {
+		this.initializer = initializer;
 		this.initialized = true;
 	}
 	
 	@Override
-	public ServerInstance handshake(Packet handshake) {
-		this.handshake = handshake;
-		return this;
-	}
-	
-	@Override
-	public void open() {
+	public void open(String host, int port) {
+		this.initialize(host, port);
 		try {
 			LOGGER.info("Starting server");
 			new ServerBootstrap().group(this.buildGroup("server connection #%d")).channel(NioServerSocketChannel.class).childHandler(new SimpleChannelInitializer(channel -> {
-				Connection connection = new Connection(channel, this.handshake);
-				this.initializeConnection.accept(connection);
+				Connection connection = new Connection(channel);
+				this.initializer.initialize(connection);
 				this.connections.add(connection);
 				LOGGER.debug("Client connected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
 				return connection;

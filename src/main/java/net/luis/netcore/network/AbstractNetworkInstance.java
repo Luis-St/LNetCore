@@ -16,31 +16,33 @@ import java.util.Objects;
 
 abstract class AbstractNetworkInstance implements NetworkInstance {
 	
-	private final String host;
-	private final int port;
 	protected boolean initialized = false;
 	private EventLoopGroup group;
+	private String host;
+	private int port;
 	
-	public AbstractNetworkInstance(String host, int port) {
+	protected final void initialize(String host, int port) {
 		Objects.requireNonNull(host, "Host must not be null");
 		if (host.isEmpty()) {
 			throw new IllegalArgumentException("Host must not be empty");
 		}
 		this.host = "localhost".equalsIgnoreCase(host) ? "127.0.0.1" : host;
+		if (port < 0 || port > 65535) {
+			throw new IllegalArgumentException("Port must be between 0 and 65535");
+		}
 		this.port = port;
 	}
 	
-	protected final @NotNull String getHost() {
-		return this.host;
+	public final @NotNull String getHost() {
+		return Objects.requireNonNull(this.host, "Host has not been initialized");
 	}
 	
-	protected final int getPort() {
+	public final int getPort() {
 		return this.port;
 	}
 	
 	protected final @NotNull EventLoopGroup buildGroup(String name) {
-		this.group = new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat(name).setUncaughtExceptionHandler(new DefaultExceptionHandler()).build());
-		return this.group;
+		return this.group = new NioEventLoopGroup(0, new ThreadFactoryBuilder().setNameFormat(name).setUncaughtExceptionHandler(new DefaultExceptionHandler()).build());
 	}
 	
 	@Override

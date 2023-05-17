@@ -3,12 +3,13 @@ package net.luis.netcore.network;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import net.luis.netcore.network.connection.Connection;
+import net.luis.netcore.network.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 /**
  *
@@ -20,33 +21,30 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
 	
-	private final Consumer<Connection> initializeConnection;
+	private final ConnectionInitializer initializer;
 	private Connection connection;
 	private Packet handshake;
 	
-	public ClientInstance(String host, int port) {
-		this(host, port, (connection) -> {
-		});
+	public ClientInstance() {
+		this((connection) -> {});
 	}
 	
-	public ClientInstance(String host, int port, Consumer<Connection> initializeConnection) {
-		super(host, port);
-		this.initializeConnection = initializeConnection;
+	public ClientInstance(ConnectionInitializer initializer) {
+		this.initializer = initializer;
 	}
 	
-	@Override
-	public ClientInstance handshake(Packet packet) {
-		this.handshake = packet;
-		return this;
+	public void handshake(Packet handshake) {
+		this.handshake = handshake;
 	}
 	
 	@Override
-	public void open() {
+	public void open(String host, int port) {
+		this.initialize(host, port);
 		try {
 			LOGGER.info("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
-				this.connection = new Connection(channel, this.handshake);
-				this.initializeConnection.accept(this.connection);
+				this.connection = new Connection(channel, Optional.ofNullable(this.handshake));
+				this.initializer.initialize(this.connection);
 				this.initialized = true;
 				return this.connection;
 			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();

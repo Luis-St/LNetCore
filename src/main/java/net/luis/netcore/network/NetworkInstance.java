@@ -10,9 +10,11 @@ import net.luis.netcore.packet.Packet;
 
 public interface NetworkInstance {
 	
-	NetworkInstance handshake(Packet packet);
+	default void open(int port) {
+		this.open("localhost", port);
+	}
 	
-	void open();
+	void open(String host, int port);
 	
 	boolean isOpen();
 	

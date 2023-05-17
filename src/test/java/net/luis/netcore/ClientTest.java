@@ -27,8 +27,9 @@ public class ClientTest {
 	
 	public static void main(String[] args) {
 		LoggingUtils.enableConsoleDebug();
-		ClientInstance client = new ClientInstance("localhost", 8080, ClientTest::initializeConnection);
-		client.handshake(new IntegerPacket(10)).open();
+		ClientInstance client = new ClientInstance(ClientTest::initializeConnection);
+		client.handshake(new IntegerPacket(10));
+		client.open("localhost", 8080);
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {

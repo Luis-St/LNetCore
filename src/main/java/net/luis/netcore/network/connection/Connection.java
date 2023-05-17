@@ -36,9 +36,13 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	private final Channel channel;
 	private final Optional<Packet> handshake;
 	
-	public Connection(Channel channel, Packet handshake) {
+	public Connection(Channel channel) {
+		this(channel, Optional.empty());
+	}
+	
+	public Connection(Channel channel, Optional<Packet> handshake) {
 		this.channel = channel;
-		this.handshake = Optional.ofNullable(handshake);
+		this.handshake = handshake;
 	}
 	
 	public @NotNull UUID getUniqueId() {
@@ -153,7 +157,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		for (Listener listener : listeners) {
 			if (listener.shouldCall(packet)) {
 				try {
-					listener.listener().accept(packet, this::send);
+					listener.call(packet, this::send);
 					handled = true;
 				} catch (Exception e) {
 					LOGGER.warn("Caught exception while calling listener {}", listener.uniqueId(), e);
@@ -207,6 +211,12 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 				return false;
 			}
 			return this.target.isAny() || this.target.equals(packet.getTarget());
+		}
+		
+		public void call(Packet packet, Consumer<Packet> sender) {
+			Objects.requireNonNull(packet, "Packet must not be null");
+			Objects.requireNonNull(sender, "Sender must not be null");
+			this.listener.accept(packet, sender);
 		}
 	}
 	//endregion
