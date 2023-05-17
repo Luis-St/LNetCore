@@ -86,7 +86,7 @@ public class PacketRegistry {
 	public static void register(Class<? extends Packet> clazz) {
 		Objects.requireNonNull(clazz, "Cannot register packet because the class is null");
 		if (PACKETS.containsValue(clazz)) {
-			LOGGER.error("Packet {} is already registered", clazz.getSimpleName());
+			LOGGER.error("{} is already registered", clazz.getSimpleName());
 			return;
 		}
 		if (!ReflectionHelper.hasConstructor(clazz, FriendlyByteBuffer.class)) {
@@ -112,7 +112,6 @@ public class PacketRegistry {
 		register(MapPacket.class);
 		register(InfoPacket.class);
 		register(ErrorPacket.class);
-		register(IntegerPacket.class);
 		register(BooleanPacket.class);
 		register(DoublePacket.class);
 		register(IntegerPacket.class);

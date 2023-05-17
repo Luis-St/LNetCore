@@ -165,7 +165,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 			}
 		}
 		if (!handled) {
-			LOGGER.warn("{} with target {} was not handled by any listener", packet, packet.getTarget());
+			LOGGER.warn("{} with target '{}' was not handled by any listener", packet, packet.getTarget().getName());
 		}
 	}
 	
