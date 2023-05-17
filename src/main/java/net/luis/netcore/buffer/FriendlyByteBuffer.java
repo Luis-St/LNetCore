@@ -4,6 +4,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.luis.netcore.buffer.decode.Decodable;
+import net.luis.netcore.buffer.decode.Decoder;
+import net.luis.netcore.buffer.encode.Encodable;
+import net.luis.netcore.buffer.encode.Encoder;
 import net.luis.utils.util.Utils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -101,20 +105,20 @@ public final class FriendlyByteBuffer {
 		this.writeLong(value.getLeastSignificantBits());
 	}
 	
-	public <T> void writeList(List<T> list, Consumer<T> encoder) {
+	public <T> void writeList(List<T> list, Encoder<T> encoder) {
 		Objects.requireNonNull(list, "List must not be null");
 		this.writeInt(list.size());
 		for (T t : list) {
-			Objects.requireNonNull(encoder, "Encoder must not be null").accept(t);
+			Objects.requireNonNull(encoder, "Encoder must not be null").encode(t);
 		}
 	}
 	
-	public <K, V> void writeMap(Map<K, V> map, Consumer<K> keyEncoder, Consumer<V> valueEncoder) {
+	public <K, V> void writeMap(Map<K, V> map, Encoder<K> keyEncoder, Encoder<V> valueEncoder) {
 		Objects.requireNonNull(map, "Map must not be null");
 		this.writeInt(map.size());
 		for (Map.Entry<K, V> entry : map.entrySet()) {
-			Objects.requireNonNull(keyEncoder, "Key encoder must not be null").accept(entry.getKey());
-			Objects.requireNonNull(valueEncoder, "Value encoder must not be null").accept(entry.getValue());
+			Objects.requireNonNull(keyEncoder, "Key encoder must not be null").encode(entry.getKey());
+			Objects.requireNonNull(valueEncoder, "Value encoder must not be null").encode(entry.getValue());
 		}
 	}
 	//endregion
@@ -132,21 +136,21 @@ public final class FriendlyByteBuffer {
 		return uuid.equals(Utils.EMPTY_UUID) ? Utils.EMPTY_UUID : uuid;
 	}
 	
-	public <T> @NotNull List<T> readList(Supplier<T> decoder) {
+	public <T> @NotNull List<T> readList(Decoder<T> decoder) {
 		List<T> list = Lists.newArrayList();
 		int size = this.readInt();
 		for (int i = 0; i < size; i++) {
-			list.add(Objects.requireNonNull(decoder, "Decoder must not be null").get());
+			list.add(Objects.requireNonNull(decoder, "Decoder must not be null").decode());
 		}
 		return list;
 	}
 	
-	public <K, V> @NotNull Map<K, V> readMap(Supplier<K> keyDecoder, Supplier<V> valueDecoder) {
+	public <K, V> @NotNull Map<K, V> readMap(Decoder<K> keyDecoder, Decoder<V> valueDecoder) {
 		Map<K, V> map = Maps.newHashMap();
 		int size = this.buffer.readInt();
 		for (int i = 0; i < size; i++) {
-			K key = Objects.requireNonNull(keyDecoder, "Key decoder must not be null").get();
-			V value = Objects.requireNonNull(valueDecoder, "Value decoder must not be null").get();
+			K key = Objects.requireNonNull(keyDecoder, "Key decoder must not be null").decode();
+			V value = Objects.requireNonNull(valueDecoder, "Value decoder must not be null").decode();
 			map.put(key, value);
 		}
 		return map;

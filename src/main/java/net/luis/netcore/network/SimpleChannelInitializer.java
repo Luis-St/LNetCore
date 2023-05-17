@@ -5,13 +5,12 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import net.luis.netcore.network.connection.Connection;
+import net.luis.netcore.network.connection.ConnectionFactory;
 import net.luis.netcore.packet.PacketDecoder;
 import net.luis.netcore.packet.PacketEncoder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *
@@ -21,9 +20,9 @@ import java.util.function.Function;
 
 public final class SimpleChannelInitializer extends ChannelInitializer<Channel> {
 	
-	private final Function<Channel, Connection> factory;
+	private final ConnectionFactory factory;
 	
-	public SimpleChannelInitializer(Function<Channel, Connection> factory) {
+	public SimpleChannelInitializer(ConnectionFactory factory) {
 		this.factory = Objects.requireNonNull(factory, "Factory must not be null");
 	}
 	
@@ -34,6 +33,6 @@ public final class SimpleChannelInitializer extends ChannelInitializer<Channel> 
 		pipeline.addLast("decoder", new PacketDecoder());
 		pipeline.addLast("prepender", new ProtobufVarint32LengthFieldPrepender());
 		pipeline.addLast("encoder", new PacketEncoder());
-		pipeline.addLast("handler", this.factory.apply(channel));
+		pipeline.addLast("handler", this.factory.create(channel));
 	}
 }

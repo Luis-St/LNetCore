@@ -1,7 +1,7 @@
-package net.luis.netcore.buffer;
+package net.luis.netcore.buffer.decode;
 
+import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
-import org.jetbrains.annotations.NotNull;
 
 /**
  *

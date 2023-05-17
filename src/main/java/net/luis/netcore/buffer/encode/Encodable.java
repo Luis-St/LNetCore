@@ -1,5 +1,6 @@
-package net.luis.netcore.buffer;
+package net.luis.netcore.buffer.encode;
 
+import net.luis.netcore.buffer.FriendlyByteBuffer;
 import org.jetbrains.annotations.NotNull;
 
 /**

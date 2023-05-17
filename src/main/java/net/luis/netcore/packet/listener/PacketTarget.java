@@ -1,12 +1,10 @@
 package net.luis.netcore.packet.listener;
 
-import com.google.common.collect.Maps;
-import net.luis.netcore.buffer.Decodable;
-import net.luis.netcore.buffer.Encodable;
+import net.luis.netcore.buffer.decode.Decodable;
+import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**

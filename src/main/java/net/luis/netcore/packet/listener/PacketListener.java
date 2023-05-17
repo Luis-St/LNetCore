@@ -8,6 +8,7 @@ import net.luis.netcore.network.connection.Connection;
  *
  */
 
+@FunctionalInterface
 public interface PacketListener {
 	
 	void initialize(Connection connection);
