@@ -6,4 +6,8 @@ build
 setup.bat
 /.idea/
 LNetCore.iml
+/src/main/java/net/luis/netcore/Main.java
+
+# logs
 /logs/
+
