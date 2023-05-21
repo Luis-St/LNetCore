@@ -1,9 +1,9 @@
 package net.luis.netcore.packet.impl.data;
 
 import com.google.common.collect.Lists;
+import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
-import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 

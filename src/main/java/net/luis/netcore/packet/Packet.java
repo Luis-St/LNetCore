@@ -1,8 +1,8 @@
 package net.luis.netcore.packet;
 
+import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
-import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.listener.PacketTarget;
 import org.jetbrains.annotations.NotNull;
 

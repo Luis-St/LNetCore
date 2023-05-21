@@ -4,9 +4,6 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
-
 /**
  *
  * @author Luis-St
