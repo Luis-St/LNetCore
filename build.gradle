@@ -33,6 +33,13 @@ dependencies {
 	implementation "org.jetbrains:annotations:${JetBrainsAnnotations}" // Annotations
 }
 
+tasks.register("run", JavaExec) {
+	group = "runs"
+	getMainClass().set("net.luis.netcore.Main")
+	classpath = sourceSets.main.runtimeClasspath
+	enableAssertions = true
+}
+
 tasks.register("testClient", JavaExec) {
 	group = "test"
 	classpath = sourceSets.test.runtimeClasspath

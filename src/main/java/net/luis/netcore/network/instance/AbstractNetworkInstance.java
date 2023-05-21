@@ -1,4 +1,4 @@
-package net.luis.netcore.network;
+package net.luis.netcore.network.instance;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
@@ -16,10 +16,10 @@ import java.util.Objects;
 
 abstract class AbstractNetworkInstance implements NetworkInstance {
 	
-	protected boolean initialized = false;
 	private EventLoopGroup group;
 	private String host;
 	private int port;
+	protected boolean initialized = false;
 	
 	protected final void initialize(String host, int port) {
 		Objects.requireNonNull(host, "Host must not be null");

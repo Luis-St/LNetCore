@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.exception.SkipPacketException;
+import net.luis.netcore.network.connection.event.ConnectionEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.filter.PacketFilter;
 import net.luis.netcore.packet.listener.ListenerBuilder;
@@ -61,14 +62,17 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	public void send(Packet packet) {
 		this.channel.writeAndFlush(packet).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-		LOGGER.debug("Sent packet {}", packet.getClass().getSimpleName());
+		ConnectionEvent.SEND.trigger(packet);
+		LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
 	}
 	
 	//region Netty overrides
 	@Override
 	public void channelActive(ChannelHandlerContext context) {
+		ConnectionEvent.OPEN.trigger();
 		this.handshake.ifPresent(handshake -> {
 			this.channel.writeAndFlush(handshake.withTarget(PacketTarget.HANDSHAKE)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+			ConnectionEvent.HANDSHAKE.trigger(handshake);
 			LOGGER.debug("Sent handshake {}", handshake.getClass().getSimpleName());
 		});
 	}
@@ -90,6 +94,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
+		ConnectionEvent.EXCEPTION.trigger(cause);
 		if (cause instanceof SkipPacketException e) {
 			LOGGER.info("Skipping packet", e);
 		} else if (this.channel.isOpen()) {
@@ -105,8 +110,8 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	@Override
-	public void channelInactive(ChannelHandlerContext context) {
-		LOGGER.info("Channel inactive");
+	public void channelInactive(ChannelHandlerContext context) throws Exception {
+		ConnectionEvent.CLOSE.trigger();
 	}
 	//endregion
 	
@@ -154,6 +159,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 				}
 			}
 		}
+		ConnectionEvent.RECEIVE.trigger(packet);
 		if (!handled) {
 			LOGGER.warn("{} with target '{}' was not handled by any listener", packet, packet.getTarget().getName());
 		}
