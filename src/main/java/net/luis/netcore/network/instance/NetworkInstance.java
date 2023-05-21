@@ -1,4 +1,4 @@
-package net.luis.netcore.network;
+package net.luis.netcore.network.instance;
 
 import net.luis.netcore.packet.Packet;
 
@@ -21,4 +21,6 @@ public interface NetworkInstance {
 	void send(Packet packet);
 	
 	void closeNow();
+	
+	void closeOn(ClosingAction action);
 }

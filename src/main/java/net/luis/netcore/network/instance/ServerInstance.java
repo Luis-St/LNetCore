@@ -1,8 +1,9 @@
-package net.luis.netcore.network;
+package net.luis.netcore.network.instance;
 
 import com.google.common.collect.Lists;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import net.luis.netcore.network.SimpleChannelInitializer;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.network.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
@@ -11,9 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  *
