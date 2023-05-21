@@ -1,8 +1,8 @@
 package net.luis.netcore.packet.listener;
 
+import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
-import net.luis.netcore.buffer.FriendlyByteBuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -35,10 +35,14 @@ public final class PacketTarget implements Encodable, Decodable {
 	}
 	
 	public static @NotNull PacketTarget of(int target) {
-	    return new PacketTarget("custom-" + target, target);
+		return of("custom-" + target, target);
 	}
 	
-	public String getName() {
+	public static @NotNull PacketTarget of(String name, int target) {
+		return new PacketTarget(name, target);
+	}
+	
+	public @NotNull String getName() {
 		return this.name;
 	}
 	

@@ -1,6 +1,6 @@
 package net.luis.netcore;
 
-import net.luis.netcore.network.ClientInstance;
+import net.luis.netcore.network.instance.ClientInstance;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
@@ -33,7 +33,7 @@ public class ClientTest {
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {
-		connection.registerListener(PacketTarget.ANY, PacketPriority.HIGHEST, packet -> LOGGER.debug("Received packet: {}", packet));
+		connection.builder().target(PacketTarget.ANY).priority(PacketPriority.HIGHEST).listener(packet -> LOGGER.debug("Received packet: {}", packet)).register();
 		connection.registerListener(new Listener());
 		LOGGER.info("Client connection initialized");
 	}
@@ -44,9 +44,9 @@ public class ClientTest {
 		
 		@Override
 		public void initialize(Connection connection) {
-			connection.registerListener(PacketTarget.ANY, PacketPriority.HIGH, this::emptyListener);
-			connection.registerListener(this::doubleListener);
-			connection.registerListener(StringPacket.class, (packet, sender) -> this.doubleListener(packet, packet.get()));
+			connection.builder().target(PacketTarget.ANY).priority(PacketPriority.HIGH).listener(this::emptyListener).register();
+			connection.builder().listener(this::doubleListener).register();
+			connection.builder().priority(2).listener(StringPacket.class, (packet, sender) -> this.doubleListener(packet, packet.get())).register();
 		}
 		
 		public void emptyListener() {

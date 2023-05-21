@@ -1,10 +1,9 @@
 package net.luis.netcore;
 
-import net.luis.netcore.network.ServerInstance;
+import net.luis.netcore.network.instance.ServerInstance;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.value.StringPacket;
-import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.logging.LoggingUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +26,8 @@ public class ServerTest {
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {
-		connection.registerListener(ServerTest::logPacket);
-		connection.registerListener((packet, sender) -> sender.accept(new StringPacket("You sent " + packet).withTarget(4)));
+		connection.builder().listener(ServerTest::logPacket).register();
+		connection.builder().listener((packet, sender) -> sender.accept(new StringPacket("You sent " + packet).withTarget(4))).register();
 		LOGGER.info("Server connection initialized");
 	}
 	

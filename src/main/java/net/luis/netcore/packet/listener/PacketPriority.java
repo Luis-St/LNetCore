@@ -1,13 +1,8 @@
 package net.luis.netcore.packet.listener;
 
-import com.google.common.collect.Comparators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -17,8 +12,6 @@ import java.util.Objects;
  */
 
 public final class PacketPriority implements Comparable<PacketPriority> {
-	
-	private static final Map<Integer, PacketPriority> VALUES = Maps.newHashMap();
 	
 	public static final PacketPriority LOWEST = new PacketPriority("lowest", -2);
 	public static final PacketPriority LOW = new PacketPriority("low", -1);
@@ -32,7 +25,6 @@ public final class PacketPriority implements Comparable<PacketPriority> {
 	private PacketPriority(String name, int priority) {
 		this.name = Objects.requireNonNull(name, "Name must not be null");
 		this.priority = priority;
-		VALUES.put(this.priority, this);
 	}
 	
 	public static @NotNull PacketPriority of(int priority) {
@@ -42,22 +34,12 @@ public final class PacketPriority implements Comparable<PacketPriority> {
 			case 0 -> NORMAL;
 			case 1 -> HIGH;
 			case 2 -> HIGHEST;
-			default -> {
-				if (VALUES.containsKey(priority)) {
-					yield VALUES.get(priority);
-				} else {
-					throw new IllegalArgumentException("No packet priority with priority " + priority + " found");
-				}
-			}
+			default -> throw new IllegalArgumentException("No packet priority with priority " + priority + " found");
 		};
 	}
 	
 	public static @NotNull PacketPriority of(String name, int priority) {
 		return new PacketPriority(name, priority);
-	}
-	
-	public static @NotNull PacketPriority[] values() {
-		return VALUES.values().toArray(PacketPriority[]::new);
 	}
 	
 	public String getName() {

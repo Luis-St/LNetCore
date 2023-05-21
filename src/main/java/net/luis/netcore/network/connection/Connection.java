@@ -1,7 +1,6 @@
 package net.luis.netcore.network.connection;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,11 +8,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.filter.PacketFilter;
+import net.luis.netcore.packet.listener.ListenerBuilder;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketPriority;
 import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.utils.collection.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -32,17 +35,20 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
 	private final UUID uniqueId = UUID.randomUUID();
-	private final Map<UUID, Listener> listeners = Maps.newHashMap();
+	private final Registry<ConnectionListener> listeners = Registry.of();
+	private final Registry<PacketFilter> filters = Registry.of();
 	private final Channel channel;
 	private final Optional<Packet> handshake;
 	
+	@ApiStatus.Internal
 	public Connection(Channel channel) {
 		this(channel, Optional.empty());
 	}
 	
+	@ApiStatus.Internal
 	public Connection(Channel channel, Optional<Packet> handshake) {
-		this.channel = channel;
-		this.handshake = handshake;
+		this.channel = Objects.requireNonNull(channel, "Channel must not be null");
+		this.handshake = Objects.requireNonNull(handshake, "Handshake must not be null");
 	}
 	
 	public @NotNull UUID getUniqueId() {
@@ -71,8 +77,12 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	protected void channelRead0(ChannelHandlerContext context, Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		try {
-			LOGGER.debug("Received packet {}", packet);
-			this.callListeners(packet);
+			LOGGER.debug("Received {}", packet);
+			if (this.filters.getItems().stream().anyMatch(filter -> filter.filter(packet))) {
+				LOGGER.debug("{} with target '{}' was filtered", packet.getClass().getSimpleName(), packet.getTarget().getName());
+			} else {
+				this.callListeners(packet);
+			}
 		} catch (Exception e) {
 			LOGGER.warn("Fail to handle {}", packet, e);
 		}
@@ -100,67 +110,47 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	//endregion
 	
-	//region Register listeners overloads
-	public @NotNull UUID registerListener(Runnable listener) {
-		return this.registerListener(Packet.class, PacketTarget.ANY, PacketPriority.NORMAL, (packet, sender) -> listener.run());
+	//region Listener registration
+	public @NotNull ListenerBuilder builder() {
+		return new ListenerBuilder(this);
 	}
-	
-	public <T extends Packet> @NotNull UUID registerListener(Consumer<Packet> listener) {
-		return this.registerListener(Packet.class, PacketTarget.ANY, PacketPriority.NORMAL, listener);
-	}
-	
-	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, Consumer<T> listener) {
-		return this.registerListener(packetClass, PacketTarget.ANY, PacketPriority.NORMAL, listener);
-	}
-	
-	public <T extends Packet> @NotNull UUID registerListener(PacketTarget target, PacketPriority priority, Consumer<Packet> listener) {
-		return this.registerListener(Packet.class, target, priority, listener);
-	}
-	
-	public @NotNull UUID registerListener(BiConsumer<Packet, Consumer<Packet>> listener) {
-		return this.registerListener(Packet.class, PacketTarget.ANY, PacketPriority.NORMAL, listener);
-	}
-	
-	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, BiConsumer<T, Consumer<Packet>> listener) {
-		return this.registerListener(packetClass, PacketTarget.ANY, PacketPriority.NORMAL, listener);
-	}
-	
-	public @NotNull UUID registerListener(PacketTarget target, PacketPriority priority, BiConsumer<Packet, Consumer<Packet>> listener) {
-		return this.registerListener(Packet.class, target, priority, listener);
-	}
-	//endregion
 	
 	public void registerListener(PacketListener listener) {
 		Objects.requireNonNull(listener, "Listener must not be null").initialize(this);
 	}
 	
-	public @NotNull UUID registerListener(PacketTarget target, PacketPriority priority, Runnable listener) {
-		return this.registerListener(Packet.class, target, priority, (packet, sender) -> listener.run());
-	}
-	
-	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, Consumer<T> listener) {
-		return this.registerListener(packetClass, target, priority, (packet, sender) -> listener.accept(packet));
-	}
-	
 	@SuppressWarnings("unchecked")
 	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<T, Consumer<Packet>> listener) {
-		UUID uniqueId = UUID.randomUUID();
-		this.listeners.put(uniqueId, new Listener(uniqueId, packetClass, target, priority, (BiConsumer<Packet, Consumer<Packet>>) listener));
-		return uniqueId;
+		return this.listeners.register(new ConnectionListener(packetClass, target, priority, (BiConsumer<Packet, Consumer<Packet>>) listener));
 	}
+	
+	public boolean removeListener(UUID uniqueId) {
+		return this.listeners.remove(uniqueId);
+	}
+	//endregion
+	
+	//region Filter registration
+	public @NotNull UUID registerFilter(PacketFilter filter) {
+		return this.filters.register(Objects.requireNonNull(filter, "Filter must not be null"));
+	}
+	
+	public boolean removeFilter(UUID uniqueId) {
+		return this.filters.remove(uniqueId);
+	}
+	//endregion
 	
 	private void callListeners(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		boolean handled = false;
-		List<Listener> listeners = Lists.newArrayList(this.listeners.values());
-		listeners.sort(Comparator.comparing(Listener::priority).reversed());
-		for (Listener listener : listeners) {
+		List<ConnectionListener> listeners = Lists.newArrayList(this.listeners.getItems());
+		listeners.sort(Comparator.comparing(ConnectionListener::priority).reversed());
+		for (ConnectionListener listener : listeners) {
 			if (listener.shouldCall(packet)) {
 				try {
 					listener.call(packet, this::send);
 					handled = true;
 				} catch (Exception e) {
-					LOGGER.warn("Caught exception while calling listener {}", listener.uniqueId(), e);
+					LOGGER.warn("Caught exception while calling listener {}", this.listeners.getUniqueId(listener), e);
 				}
 			}
 		}
@@ -191,33 +181,6 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	@Override
 	public String toString() {
 		return "Connection " + this.uniqueId;
-	}
-	//endregion
-	
-	//region Internal
-	private record Listener(UUID uniqueId, Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, Consumer<Packet>> listener) {
-		
-		public Listener {
-			Objects.requireNonNull(uniqueId, "Unique id must not be null");
-			Objects.requireNonNull(packetClass, "Packet class must not be null");
-			Objects.requireNonNull(target, "Packet target must not be null");
-			Objects.requireNonNull(priority, "Packet priority must not be null");
-			Objects.requireNonNull(listener, "Listener must not be null");
-		}
-		
-		public boolean shouldCall(Packet packet) {
-			Objects.requireNonNull(packet, "Packet must not be null");
-			if (!this.packetClass.isAssignableFrom(packet.getClass())) {
-				return false;
-			}
-			return this.target.isAny() || this.target.equals(packet.getTarget());
-		}
-		
-		public void call(Packet packet, Consumer<Packet> sender) {
-			Objects.requireNonNull(packet, "Packet must not be null");
-			Objects.requireNonNull(sender, "Sender must not be null");
-			this.listener.accept(packet, sender);
-		}
 	}
 	//endregion
 }
