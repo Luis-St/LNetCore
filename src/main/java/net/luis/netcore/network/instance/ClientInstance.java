@@ -5,12 +5,19 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import net.luis.netcore.network.SimpleChannelInitializer;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.network.connection.ConnectionInitializer;
+
+import net.luis.netcore.network.connection.event.ConnectionEventManager;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
+import net.luis.utils.event.Event;
+import net.luis.utils.util.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import  static net.luis.netcore.network.connection.event.ConnectionEventManager.INSTANCE;
 
 /**
  *
@@ -63,11 +70,17 @@ public class ClientInstance extends AbstractNetworkInstance {
 	@Override
 	public void closeNow() {
 		if (this.connection != null) {
+			this.connection.send(new CloseConnectionPacket());
 			this.connection.close();
 			this.connection = null;
 		}
 		super.closeNow();
 		LOGGER.info("Client closed");
+	}
+	
+	@Override
+	public <E extends Event> void closeOn(ClosingTrigger<E> action) {
+	
 	}
 	
 	//region Object overrides

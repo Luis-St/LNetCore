@@ -27,7 +27,7 @@ public class ServerTest {
 	
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.builder().listener(ServerTest::logPacket).register();
-		connection.builder().listener((packet, sender) -> sender.accept(new StringPacket("You sent " + packet).withTarget(4))).register();
+		connection.builder().listener((packet, ctx) -> ctx.sendPacket(new StringPacket("You sent " + packet).withTarget(4))).register();
 		LOGGER.info("Server connection initialized");
 	}
 	

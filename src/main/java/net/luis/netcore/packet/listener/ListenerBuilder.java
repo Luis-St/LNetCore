@@ -1,6 +1,7 @@
 package net.luis.netcore.packet.listener;
 
 import net.luis.netcore.network.connection.Connection;
+import net.luis.netcore.network.connection.ConnectionContext;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class ListenerBuilder {
 	private PacketTarget target = PacketTarget.ANY;
 	private PacketPriority priority = PacketPriority.NORMAL;
 	private Class<? extends Packet> packetClass = Packet.class;
-	private BiConsumer<Packet, Consumer<Packet>> consumer;
+	private BiConsumer<Packet, ConnectionContext> consumer;
 	
 	public ListenerBuilder(Connection connection) {
 		this.connection = Objects.requireNonNull(connection, "Connection must not be null");
@@ -64,14 +65,14 @@ public class ListenerBuilder {
 		return this.listener(packetClass, (packet, sender) -> listener.accept(packet));
 	}
 	
-	public @NotNull ListenerBuilder listener(BiConsumer<Packet, Consumer<Packet>> listener) {
+	public @NotNull ListenerBuilder listener(BiConsumer<Packet, ConnectionContext> listener) {
 		return this.listener(Packet.class, listener);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T extends Packet> @NotNull ListenerBuilder listener(Class<T> packetClass, BiConsumer<T, Consumer<Packet>> listener) {
+	public <T extends Packet> @NotNull ListenerBuilder listener(Class<T> packetClass, BiConsumer<T, ConnectionContext> listener) {
 		this.packetClass = Objects.requireNonNull(packetClass, "Packet class must not be null");
-		this.consumer = (BiConsumer<Packet, Consumer<Packet>>) Objects.requireNonNull(listener, "Listener must not be null");
+		this.consumer = (BiConsumer<Packet, ConnectionContext>) Objects.requireNonNull(listener, "Listener must not be null");
 		return this;
 	}
 	

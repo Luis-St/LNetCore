@@ -1,6 +1,7 @@
 package net.luis.netcore.network.instance;
 
 import net.luis.netcore.packet.Packet;
+import net.luis.utils.event.Event;
 
 /**
  *
@@ -22,5 +23,5 @@ public interface NetworkInstance {
 	
 	void closeNow();
 	
-	void closeOn(ClosingAction action);
+	<E extends Event> void closeOn(ClosingTrigger<E> action);
 }

@@ -1,19 +1,13 @@
 package net.luis.netcore.network.connection;
 
 import com.google.common.collect.Lists;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.exception.SkipPacketException;
-import net.luis.netcore.network.connection.event.ConnectionEvent;
+import net.luis.netcore.network.connection.event.impl.*;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.filter.PacketFilter;
-import net.luis.netcore.packet.listener.ListenerBuilder;
-import net.luis.netcore.packet.listener.PacketListener;
-import net.luis.netcore.packet.listener.PacketPriority;
-import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.netcore.packet.listener.*;
 import net.luis.utils.collection.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +17,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+
+import static io.netty.channel.ChannelFutureListener.*;
+import static net.luis.netcore.network.connection.event.ConnectionEventManager.*;
+import static net.luis.netcore.network.connection.event.ConnectionEventType.CLOSE;
+import static net.luis.netcore.network.connection.event.ConnectionEventType.*;
 
 /**
  *
@@ -61,19 +59,25 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	public void send(Packet packet) {
-		this.channel.writeAndFlush(packet).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-		ConnectionEvent.SEND.trigger(packet);
-		LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
+		SendEvent event = new SendEvent(packet);
+		INSTANCE.dispatch(SEND, event);
+		if (!event.isCancelled()) {
+			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
+			LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
+		}
 	}
 	
 	//region Netty overrides
 	@Override
 	public void channelActive(ChannelHandlerContext context) {
-		ConnectionEvent.OPEN.trigger();
+		INSTANCE.dispatch(OPEN, new OpenEvent());
 		this.handshake.ifPresent(handshake -> {
-			this.channel.writeAndFlush(handshake.withTarget(PacketTarget.HANDSHAKE)).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-			ConnectionEvent.HANDSHAKE.trigger(handshake);
-			LOGGER.debug("Sent handshake {}", handshake.getClass().getSimpleName());
+			HandshakeEvent event = new HandshakeEvent(handshake);
+			INSTANCE.dispatch(HANDSHAKE, event);
+			if (!event.isCancelled()) {
+				this.channel.writeAndFlush(event.getPacket().withTarget(PacketTarget.HANDSHAKE)).addListener(CLOSE_ON_FAILURE);
+				LOGGER.debug("Sent handshake {}", event.getPacket().getClass().getSimpleName());
+			}
 		});
 	}
 	
@@ -94,7 +98,6 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
-		ConnectionEvent.EXCEPTION.trigger(cause);
 		if (cause instanceof SkipPacketException e) {
 			LOGGER.info("Skipping packet", e);
 		} else if (this.channel.isOpen()) {
@@ -111,7 +114,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	@Override
 	public void channelInactive(ChannelHandlerContext context) throws Exception {
-		ConnectionEvent.CLOSE.trigger();
+		INSTANCE.dispatch(CLOSE, new CloseEvent());
 	}
 	//endregion
 	
@@ -125,8 +128,8 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<T, Consumer<Packet>> listener) {
-		return this.listeners.register(new ConnectionListener(packetClass, target, priority, (BiConsumer<Packet, Consumer<Packet>>) listener));
+	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<T, ConnectionContext> listener) {
+		return this.listeners.register(new ConnectionListener(packetClass, target, priority, (BiConsumer<Packet, ConnectionContext>) listener));
 	}
 	
 	public boolean removeListener(UUID uniqueId) {
@@ -152,16 +155,17 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		for (ConnectionListener listener : listeners) {
 			if (listener.shouldCall(packet)) {
 				try {
-					listener.call(packet, this::send);
+					listener.call(packet, new ConnectionContext(this.uniqueId, this::send));
 					handled = true;
 				} catch (Exception e) {
 					LOGGER.warn("Caught exception while calling listener {}", this.listeners.getUniqueId(listener), e);
 				}
 			}
 		}
-		ConnectionEvent.RECEIVE.trigger(packet);
-		if (!handled) {
-			LOGGER.warn("{} with target '{}' was not handled by any listener", packet, packet.getTarget().getName());
+		ReceiveEvent event = new ReceiveEvent(packet, handled);
+		INSTANCE.dispatch(RECEIVE, event);
+		if (!event.isHandled()) {
+			LOGGER.warn("{} with target '{}' was not handled by any listener and event", packet, packet.getTarget().getName());
 		}
 	}
 	
