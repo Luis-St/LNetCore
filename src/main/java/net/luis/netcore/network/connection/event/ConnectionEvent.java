@@ -7,6 +7,13 @@ package net.luis.netcore.network.connection.event;
  */
 
 public interface ConnectionEvent {
+	
+
+	
+	
+	
+	
+	
 	OpenEvent OPEN = new OpenEvent();
 	HandshakeEvent HANDSHAKE = new HandshakeEvent();
 	SendEvent SEND = new SendEvent();
