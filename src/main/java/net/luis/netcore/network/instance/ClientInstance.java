@@ -79,8 +79,13 @@ public class ClientInstance extends AbstractNetworkInstance {
 	}
 	
 	@Override
-	public <E extends Event> void closeOn(ClosingTrigger<E> action) {
-	
+	public <E extends Event> void closeOn(ClosingTrigger<E> trigger) {
+		Objects.requireNonNull(trigger, "Closing trigger must not be null");
+		INSTANCE.register(trigger.getTrigger(), (type, event) -> {
+			if (trigger.shouldClose(event)) {
+				this.closeNow();
+			}
+		});
 	}
 	
 	//region Object overrides

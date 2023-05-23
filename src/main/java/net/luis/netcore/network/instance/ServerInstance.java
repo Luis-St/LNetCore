@@ -50,6 +50,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 				connection.registerListener(CloseConnectionPacket.class, PacketTarget.ANY, PacketPriority.NORMAL, (packet, ctx) -> {
 					connection.close();
 					this.connections.remove(connection.getUniqueId());
+					LOGGER.info("Client disconnected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
 				});
 				this.initializer.initialize(connection);
 				this.connections.put(connection.getUniqueId(), connection);
