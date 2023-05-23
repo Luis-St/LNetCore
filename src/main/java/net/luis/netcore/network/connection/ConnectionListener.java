@@ -5,6 +5,7 @@ import net.luis.netcore.packet.listener.PacketPriority;
 import net.luis.netcore.packet.listener.PacketTarget;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -14,9 +15,10 @@ import java.util.function.Consumer;
  *
  */
 
-record ConnectionListener(Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, ConnectionContext> listener) {
+record ConnectionListener(UUID uniqueId, Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, ConnectionContext> listener) {
 	
 	public ConnectionListener {
+		Objects.requireNonNull(uniqueId, "Unique id must not be null");
 		Objects.requireNonNull(packetClass, "Packet class must not be null");
 		Objects.requireNonNull(target, "Packet target must not be null");
 		Objects.requireNonNull(priority, "Packet priority must not be null");

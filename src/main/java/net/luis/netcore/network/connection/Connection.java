@@ -129,7 +129,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	@SuppressWarnings("unchecked")
 	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<T, ConnectionContext> listener) {
-		return this.listeners.register(new ConnectionListener(packetClass, target, priority, (BiConsumer<Packet, ConnectionContext>) listener));
+		return this.listeners.register(uniqueId -> new ConnectionListener(uniqueId, packetClass, target, priority, (BiConsumer<Packet, ConnectionContext>) listener));
 	}
 	
 	public boolean removeListener(UUID uniqueId) {
@@ -158,7 +158,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 					listener.call(packet, new ConnectionContext(this.uniqueId, this::send));
 					handled = true;
 				} catch (Exception e) {
-					LOGGER.warn("Caught exception while calling listener {}", this.listeners.getUniqueId(listener), e);
+					LOGGER.warn("Caught exception while calling listener {}", listener.uniqueId(), e);
 				}
 			}
 		}
