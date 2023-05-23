@@ -4,9 +4,7 @@ import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.action.ActionPacket;
-import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
-import net.luis.netcore.packet.impl.action.InitializeConnectionPacket;
+import net.luis.netcore.packet.impl.action.*;
 import net.luis.netcore.packet.impl.data.DataPacket;
 import net.luis.netcore.packet.impl.data.ListPacket;
 import net.luis.netcore.packet.impl.data.MapPacket;
@@ -107,6 +105,7 @@ public class PacketRegistry {
 		register(ActionPacket.class);
 		register(CloseConnectionPacket.class);
 		register(InitializeConnectionPacket.class);
+		register(ServerClosePacket.class);
 		register(DataPacket.class);
 		register(ListPacket.class);
 		register(MapPacket.class);
