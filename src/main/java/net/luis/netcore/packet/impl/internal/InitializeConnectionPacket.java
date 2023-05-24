@@ -1,4 +1,4 @@
-package net.luis.netcore.packet.impl.action;
+package net.luis.netcore.packet.impl.internal;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
@@ -12,13 +12,13 @@ import org.jetbrains.annotations.NotNull;
  */
 
 @Internal
-public class CloseServerPacket extends Packet {
+public class InitializeConnectionPacket extends Packet {
 	
-	public CloseServerPacket() {
+	public InitializeConnectionPacket() {
 	
 	}
 	
-	public CloseServerPacket(@NotNull FriendlyByteBuffer buffer) {
+	public InitializeConnectionPacket(@NotNull FriendlyByteBuffer buffer) {
 	
 	}
 	

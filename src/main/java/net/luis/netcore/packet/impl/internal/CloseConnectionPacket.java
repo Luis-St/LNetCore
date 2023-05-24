@@ -1,4 +1,4 @@
-package net.luis.netcore.packet.impl.action;
+package net.luis.netcore.packet.impl.internal;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
