@@ -132,6 +132,18 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		return new ListenerBuilder(this);
 	}
 	
+	public @NotNull ListenerBuilder builder(PacketTarget target) {
+		return new DefaultListenerBuilder(this, target);
+	}
+	
+	public @NotNull ListenerBuilder builder(PacketPriority priority) {
+		return new DefaultListenerBuilder(this, priority);
+	}
+	
+	public @NotNull ListenerBuilder builder(PacketTarget target, PacketPriority priority) {
+		return new DefaultListenerBuilder(this, target, priority);
+	}
+	
 	public void registerListener(PacketListener listener) {
 		Objects.requireNonNull(listener, "Listener must not be null").initialize(this);
 	}

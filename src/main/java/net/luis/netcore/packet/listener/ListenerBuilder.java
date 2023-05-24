@@ -3,6 +3,7 @@ package net.luis.netcore.packet.listener;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.network.connection.ConnectionContext;
 import net.luis.netcore.packet.Packet;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -19,11 +20,12 @@ import java.util.function.Consumer;
 public class ListenerBuilder {
 	
 	private final Connection connection;
-	private PacketTarget target = PacketTarget.ANY;
-	private PacketPriority priority = PacketPriority.NORMAL;
+	protected PacketTarget target = PacketTarget.ANY;
+	protected PacketPriority priority = PacketPriority.NORMAL;
 	private Class<? extends Packet> packetClass = Packet.class;
 	private BiConsumer<Packet, ConnectionContext> consumer;
 	
+	@ApiStatus.Internal
 	public ListenerBuilder(Connection connection) {
 		this.connection = Objects.requireNonNull(connection, "Connection must not be null");
 	}
