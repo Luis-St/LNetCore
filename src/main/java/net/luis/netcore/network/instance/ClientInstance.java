@@ -5,19 +5,17 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import net.luis.netcore.network.SimpleChannelInitializer;
 import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.network.connection.ConnectionInitializer;
-
-import net.luis.netcore.network.connection.event.ConnectionEventManager;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
+import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.utils.event.Event;
-import net.luis.utils.util.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 import java.util.Optional;
 
-import  static net.luis.netcore.network.connection.event.ConnectionEventManager.INSTANCE;
+import static net.luis.netcore.network.connection.event.ConnectionEventManager.*;
 
 /**
  *
@@ -26,6 +24,11 @@ import  static net.luis.netcore.network.connection.event.ConnectionEventManager.
  */
 
 public class ClientInstance extends AbstractNetworkInstance {
+	
+	/**
+	 * TODO:
+	 *  - add support for default builders -> target and priority can be set for all builders
+	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
 	
@@ -52,6 +55,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 			LOGGER.info("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
 				this.connection = new Connection(channel, Optional.ofNullable(this.handshake));
+				this.connection.registerListener(new InternalListener(this));
 				this.initializer.initialize(this.connection);
 				this.initialized = true;
 				return this.connection;
@@ -69,16 +73,21 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	@Override
 	public void closeNow() {
-		if (this.connection != null) {
-			this.connection.send(new CloseConnectionPacket());
-			this.connection.close();
-			this.connection = null;
+		if (this.connection == null) {
+			LOGGER.warn("Client has already been closed");
+			return;
 		}
-		super.closeNow();
+		this.connection.send(new CloseConnectionPacket());
+		this.closeInternal();
 		LOGGER.info("Client closed");
 	}
 	
-	@Override
+	private void closeInternal() {
+		this.connection.close();
+		this.connection = null;
+		super.closeNow();
+	}
+	
 	public <E extends Event> void closeOn(ClosingTrigger<E> trigger) {
 		Objects.requireNonNull(trigger, "Closing trigger must not be null");
 		INSTANCE.register(trigger.getTrigger(), (type, event) -> {
@@ -86,6 +95,18 @@ public class ClientInstance extends AbstractNetworkInstance {
 				this.closeNow();
 			}
 		});
+	}
+	
+	private static record InternalListener(ClientInstance instance) implements PacketListener {
+		
+		@Override
+		public void initialize(Connection connection) {
+			connection.builder().listener(CloseConnectionPacket.class, (packet) -> this.closeConnection()).register();
+		}
+		
+		private void closeConnection() {
+			this.instance.closeInternal();
+		}
 	}
 	
 	//region Object overrides

@@ -1,6 +1,5 @@
 package net.luis.netcore.network.instance;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -9,13 +8,12 @@ import net.luis.netcore.network.connection.Connection;
 import net.luis.netcore.network.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
-import net.luis.netcore.packet.listener.PacketPriority;
-import net.luis.netcore.packet.listener.PacketTarget;
-import net.luis.utils.event.Event;
-import net.luis.utils.util.Utils;
+import net.luis.netcore.packet.impl.action.CloseServerPacket;
+import net.luis.netcore.packet.listener.PacketListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.SocketAddress;
 import java.util.*;
 
 /**
@@ -47,11 +45,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 			LOGGER.info("Starting server");
 			new ServerBootstrap().group(this.buildGroup("server connection #%d")).channel(NioServerSocketChannel.class).childHandler(new SimpleChannelInitializer(channel -> {
 				Connection connection = new Connection(channel);
-				connection.registerListener(CloseConnectionPacket.class, PacketTarget.ANY, PacketPriority.NORMAL, (packet, ctx) -> {
-					connection.close();
-					this.connections.remove(connection.getUniqueId());
-					LOGGER.info("Client disconnected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
-				});
+				connection.registerListener(new InternalListener(this, channel.remoteAddress(), connection.getUniqueId()));
 				this.initializer.initialize(connection);
 				this.connections.put(connection.getUniqueId(), connection);
 				LOGGER.debug("Client connected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
@@ -83,9 +77,28 @@ public class ServerInstance extends AbstractNetworkInstance {
 		LOGGER.info("Server closed");
 	}
 	
-	@Override
-	public <E extends Event> void closeOn(ClosingTrigger<E> action) {
-	
+	private static record InternalListener(ServerInstance instance, SocketAddress address, UUID uniqueId) implements PacketListener {
+		
+		@Override
+		public void initialize(Connection connection) {
+			connection.builder().listener(CloseConnectionPacket.class, (packet) -> this.closeConnection()).register();
+			connection.builder().listener(CloseServerPacket.class, (packet) -> this.closeServer()).register();
+		}
+		
+		private void closeConnection() {
+			Connection connection = this.instance.connections.get(this.uniqueId);
+			connection.close();
+			this.instance.connections.remove(this.uniqueId);
+			LOGGER.debug("Client disconnected with address {} using connection {}", this.address.toString().replace("/", ""), this.uniqueId);
+		}
+		
+		private void closeServer() {
+			for (Connection connection : this.instance.connections.values()) {
+				connection.send(new CloseConnectionPacket());
+				connection.close();
+			}
+			this.instance.closeNow();
+		}
 	}
 	
 	//region Object overrides

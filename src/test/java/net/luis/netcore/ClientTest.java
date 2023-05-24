@@ -5,6 +5,7 @@ import net.luis.netcore.network.connection.ConnectionContext;
 import net.luis.netcore.network.instance.ClientInstance;
 import net.luis.netcore.network.instance.ClosingTrigger;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.impl.action.CloseServerPacket;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
 import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.*;
@@ -28,7 +29,7 @@ public class ClientTest {
 		ClientInstance client = new ClientInstance(ClientTest::initializeConnection);
 		client.handshake(new IntegerPacket(10));
 		client.open("localhost", 8080);
-		client.closeOn(ClosingTrigger.closeAfterReceived(StringPacket.class));
+		//client.closeOn(ClosingTrigger.closeAfterReceived(StringPacket.class));
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {
@@ -54,6 +55,7 @@ public class ClientTest {
 		
 		public void doubleListener(Packet packet, ConnectionContext ctx) {
 			LOGGER.debug("Double listener with connection and packet");
+			ctx.sendPacket(new CloseServerPacket());
 		}
 		
 		public void doubleListener(Packet packet, String value) {

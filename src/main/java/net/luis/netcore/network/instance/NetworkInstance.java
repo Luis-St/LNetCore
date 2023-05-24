@@ -22,6 +22,4 @@ public interface NetworkInstance {
 	void send(Packet packet);
 	
 	void closeNow();
-	
-	<E extends Event> void closeOn(ClosingTrigger<E> action);
 }

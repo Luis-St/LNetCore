@@ -61,7 +61,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	public void send(Packet packet) {
 		SendEvent event = new SendEvent(packet);
 		INSTANCE.dispatch(SEND, event);
-		if (!event.isCancelled()) {
+		if (packet.isInternal() || !event.isCancelled()) {
 			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
 			LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
 		}
