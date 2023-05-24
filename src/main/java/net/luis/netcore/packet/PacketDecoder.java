@@ -40,7 +40,7 @@ public final class PacketDecoder extends ByteToMessageDecoder {
 			} else {
 				int readableBytes = buffer.readableBytes();
 				if (readableBytes > 0) {
-					if (packet.skippable()) {
+					if (packet.isSkippable()) {
 						LOGGER.warn("{} with id {} was too big than expected, found {} extra bytes while reading", packet, id, readableBytes);
 						throw new SkipPacketException();
 					} else {

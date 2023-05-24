@@ -1,14 +1,14 @@
-package net.luis.netcore.packet.registry;
+package net.luis.netcore.packet;
 
 import java.lang.annotation.*;
 
 /**
  *
- * @author Luis-St
+ * @author Luis
  *
  */
 
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AutoPacket {}
+public @interface Skippable {}

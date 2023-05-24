@@ -30,10 +30,7 @@ public abstract class Packet implements Encodable, Decodable {
 	@Override
 	public abstract void encode(@NotNull FriendlyByteBuffer buffer);
 	
-	public boolean skippable() {
-		return false;
-	}
-	
+	//region Packet target
 	public PacketTarget getTarget() {
 		return this.target;
 	}
@@ -46,8 +43,13 @@ public abstract class Packet implements Encodable, Decodable {
 	public Packet withTarget(int target) {
 		return this.withTarget(PacketTarget.of(target));
 	}
+	//endregion
 	
-	public boolean isInternal() {
+	public final boolean isSkippable() {
+		return this.getClass().isAnnotationPresent(Skippable.class);
+	}
+	
+	public final boolean isInternal() {
 		return this.getClass().isAnnotationPresent(Internal.class);
 	}
 	

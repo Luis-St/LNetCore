@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
-import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.netcore.packet.registry.PacketRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +41,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
 					throw new IllegalArgumentException("Packet " + packet.getClass().getSimpleName() + " is too big, it should be less than 8MB, but it is " + size);
 				}
 			} catch (Exception e) {
-				if (packet.skippable()) {
+				if (packet.isSkippable()) {
 					LOGGER.warn("Fail to encode packet {} with id {}", packet, id);
 					throw new SkipPacketException(e);
 				} else {
