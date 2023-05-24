@@ -8,6 +8,7 @@ import net.luis.netcore.network.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.listener.PacketListener;
+import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.event.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +28,9 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - add better test
 	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)
+	 *  - unique id of connection should be server and client the same
+	 *  - avoid exposing the connection to the initializer
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -53,7 +55,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 	public void open(String host, int port) {
 		this.initialize(host, port);
 		try {
-			LOGGER.info("Starting client");
+			LOGGER.debug("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
 				this.connection = new Connection(channel, Optional.ofNullable(this.handshake));
 				this.connection.registerListener(new InternalListener(this));
@@ -78,15 +80,16 @@ public class ClientInstance extends AbstractNetworkInstance {
 			LOGGER.warn("Client has already been closed");
 			return;
 		}
-		this.connection.send(new CloseConnectionPacket());
+		this.connection.send(new CloseConnectionPacket().withTarget(PacketTarget.INTERNAL));
 		this.closeInternal();
-		LOGGER.info("Client closed");
 	}
 	
 	private void closeInternal() {
+		LOGGER.debug("Closing client");
 		this.connection.close();
 		this.connection = null;
 		super.closeNow();
+		LOGGER.info("Client closed");
 	}
 	
 	public <E extends Event> void closeOn(ClosingTrigger<E> trigger) {

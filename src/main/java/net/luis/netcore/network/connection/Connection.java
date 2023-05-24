@@ -62,6 +62,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		if (packet.bypassEvent(SEND)) {
 			this.sendInternal(packet);
+			LOGGER.debug("{} bypassed event '{}'", packet.getClass().getSimpleName(), SEND.name());
 			return;
 		}
 		SendEvent event = new SendEvent(this.uniqueId, packet);
@@ -73,7 +74,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	private void sendInternal(Packet packet) {
 		this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
-		LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
+		LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 	}
 	
 	//region Netty overrides
@@ -187,8 +188,10 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 			ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
 			INSTANCE.dispatch(RECEIVE, event);
 			if (!event.isHandled()) {
-				LOGGER.warn("{} with target '{}' was not handled by any listener and event", packet, packet.getTarget().getName());
+				LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
 			}
+		} else {
+			LOGGER.debug("{} bypassed event '{}'", packet.getClass().getSimpleName(), RECEIVE.name());
 		}
 	}
 	

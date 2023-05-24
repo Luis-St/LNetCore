@@ -10,6 +10,7 @@ import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.impl.action.CloseServerPacket;
 import net.luis.netcore.packet.listener.PacketListener;
+import net.luis.netcore.packet.listener.PacketTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +43,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 	public void open(String host, int port) {
 		this.initialize(host, port);
 		try {
-			LOGGER.info("Starting server");
+			LOGGER.debug("Starting server");
 			new ServerBootstrap().group(this.buildGroup("server connection #%d")).channel(NioServerSocketChannel.class).childHandler(new SimpleChannelInitializer(channel -> {
 				Connection connection = new Connection(channel);
 				connection.registerListener(new InternalListener(this, channel.remoteAddress(), connection.getUniqueId()));
@@ -71,8 +72,10 @@ public class ServerInstance extends AbstractNetworkInstance {
 	
 	@Override
 	public void closeNow() {
+		LOGGER.debug("Closing server");
 		this.connections.values().forEach(Connection::close);
 		this.connections.clear();
+		LOGGER.info("Closed connections");
 		super.closeNow();
 		LOGGER.info("Server closed");
 	}
@@ -95,7 +98,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 		
 		private void closeServer() {
 			for (Connection connection : this.instance.connections.values()) {
-				connection.send(new CloseConnectionPacket());
+				connection.send(new CloseConnectionPacket().withTarget(PacketTarget.INTERNAL));
 				connection.close();
 			}
 			this.instance.closeNow();
