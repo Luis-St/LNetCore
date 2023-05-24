@@ -59,7 +59,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	public void send(Packet packet) {
-		SendEvent event = new SendEvent(packet);
+		SendEvent event = new SendEvent(this.uniqueId, packet);
 		INSTANCE.dispatch(SEND, event);
 		if (packet.isInternal() || !event.isCancelled()) {
 			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
@@ -70,9 +70,9 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	//region Netty overrides
 	@Override
 	public void channelActive(ChannelHandlerContext context) {
-		INSTANCE.dispatch(OPEN, new OpenEvent());
 		this.handshake.ifPresent(handshake -> {
-			HandshakeEvent event = new HandshakeEvent(handshake);
+		INSTANCE.dispatch(OPEN, new OpenEvent(this.uniqueId));
+			HandshakeEvent event = new HandshakeEvent(this.uniqueId, handshake);
 			INSTANCE.dispatch(HANDSHAKE, event);
 			if (!event.isCancelled()) {
 				this.channel.writeAndFlush(event.getPacket().withTarget(PacketTarget.HANDSHAKE)).addListener(CLOSE_ON_FAILURE);
@@ -114,7 +114,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	@Override
 	public void channelInactive(ChannelHandlerContext context) throws Exception {
-		INSTANCE.dispatch(CLOSE, new CloseEvent());
+		INSTANCE.dispatch(CLOSE, new CloseEvent(this.uniqueId));
 	}
 	//endregion
 	
@@ -162,10 +162,10 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 				}
 			}
 		}
-		ReceiveEvent event = new ReceiveEvent(packet, handled);
 		INSTANCE.dispatch(RECEIVE, event);
 		if (!event.isHandled()) {
 			LOGGER.warn("{} with target '{}' was not handled by any listener and event", packet, packet.getTarget().getName());
+			ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
 		}
 	}
 	

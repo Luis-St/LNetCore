@@ -19,7 +19,7 @@ public enum ConnectionEventManager {
 	
 	private final EventDispatcher dispatcher = new EventDispatcher();
 	
-	public <T extends EventType<E>, E extends Event> UUID register(T type, EventListener<T, E> listener) {
+	public <T extends EventType<E>, E extends Event> UUID register(T type, EventListener<E> listener) {
 		return this.dispatcher.register(type, listener);
 	}
 	

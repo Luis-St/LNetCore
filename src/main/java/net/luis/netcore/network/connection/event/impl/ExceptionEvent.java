@@ -1,12 +1,14 @@
 package net.luis.netcore.network.connection.event.impl;
 
+import java.util.UUID;
+
 /**
  *
  * @author Luis-St
  *
  */
 
-public record ExceptionEvent() implements ConnectionEvent {
+public record ExceptionEvent(UUID getUniqueId) implements ConnectionEvent {
 	
 	//region Object overrides
 	@Override

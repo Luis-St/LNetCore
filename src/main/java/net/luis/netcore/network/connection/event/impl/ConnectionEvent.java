@@ -9,6 +9,4 @@ import net.luis.utils.event.EventDispatcher;
  *
  */
 
-public interface ConnectionEvent extends Event {
-
-}
+public interface ConnectionEvent extends Event {}

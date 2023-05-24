@@ -1,11 +1,15 @@
 package net.luis.netcore.network.instance;
 
+import com.google.common.collect.Maps;
 import net.luis.netcore.network.connection.event.impl.ReceiveEvent;
 import net.luis.netcore.network.connection.event.impl.SendEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.utils.event.Event;
 import net.luis.utils.event.EventType;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.UUID;
 
 import static net.luis.netcore.network.connection.event.ConnectionEventType.*;
 
@@ -52,7 +56,7 @@ public interface ClosingTrigger<E extends Event> {
 	
 	static @NotNull ClosingTrigger<SendEvent> closeAfterSent(int packets) {
 		return new ClosingTrigger<SendEvent>() {
-			private int hits = 0;
+			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
 			public @NotNull EventType<SendEvent> getTrigger() {
@@ -61,14 +65,15 @@ public interface ClosingTrigger<E extends Event> {
 			
 			@Override
 			public boolean shouldClose(SendEvent event) {
-				return ++this.hits >= packets;
+				this.hits.compute(event.getUniqueId(), (uuid, integer) -> integer == null ? 1 : integer + 1);
+				return this.hits.getOrDefault(event.getUniqueId(), 0) >= packets;
 			}
 		};
 	}
 	
 	static @NotNull ClosingTrigger<SendEvent> closeAfterSent(Class<? extends Packet> packet, int packets) {
 		return new ClosingTrigger<SendEvent>() {
-			private int hits = 0;
+			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
 			public @NotNull EventType<SendEvent> getTrigger() {
@@ -77,8 +82,9 @@ public interface ClosingTrigger<E extends Event> {
 			
 			@Override
 			public boolean shouldClose(SendEvent event) {
-				if (packet.isAssignableFrom(event.getPacket().getClass())) {
-					return ++this.hits >= packets;
+				if (packet.isInstance(event.getPacket())) {
+					this.hits.compute(event.getUniqueId(), (uuid, integer) -> integer == null ? 1 : integer + 1);
+					return this.hits.getOrDefault(event.getUniqueId(), 0) >= packets;
 				}
 				return false;
 			}
@@ -117,7 +123,7 @@ public interface ClosingTrigger<E extends Event> {
 	
 	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived(int packets) {
 		return new ClosingTrigger<ReceiveEvent>() {
-			private int hits = 0;
+			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
 			public @NotNull EventType<ReceiveEvent> getTrigger() {
@@ -126,14 +132,15 @@ public interface ClosingTrigger<E extends Event> {
 			
 			@Override
 			public boolean shouldClose(ReceiveEvent event) {
-				return ++this.hits >= packets;
+				this.hits.compute(event.getUniqueId(), (uuid, integer) -> integer == null ? 1 : integer + 1);
+				return this.hits.getOrDefault(event.getUniqueId(), 0) >= packets;
 			}
 		};
 	}
 	
 	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived(Class<? extends Packet> packet, int packets) {
 		return new ClosingTrigger<ReceiveEvent>() {
-			private int hits = 0;
+			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
 			public @NotNull EventType<ReceiveEvent> getTrigger() {
@@ -142,8 +149,9 @@ public interface ClosingTrigger<E extends Event> {
 			
 			@Override
 			public boolean shouldClose(ReceiveEvent event) {
-				if (packet.isAssignableFrom(event.getPacket().getClass())) {
-					return ++this.hits >= packets;
+				if (packet.isInstance(event.getPacket())) {
+					this.hits.compute(event.getUniqueId(), (uuid, integer) -> integer == null ? 1 : integer + 1);
+					return this.hits.getOrDefault(event.getUniqueId(), 0) >= packets;
 				}
 				return false;
 			}
