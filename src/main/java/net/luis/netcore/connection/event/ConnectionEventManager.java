@@ -20,7 +20,7 @@ public enum ConnectionEventManager {
 		return this.dispatcher.register(type, listener);
 	}
 	
-	public  <T extends EventType<E>, E extends Event> boolean remove(T type, UUID uniqueId) {
+	public <T extends EventType<E>, E extends Event> boolean remove(T type, UUID uniqueId) {
 		return this.dispatcher.remove(type, uniqueId);
 	}
 	

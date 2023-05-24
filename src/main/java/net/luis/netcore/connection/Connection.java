@@ -5,7 +5,6 @@ import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.connection.event.impl.*;
 import net.luis.netcore.exception.SkipPacketException;
-import net.luis.netcore.connection.event.impl.*;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.filter.PacketFilter;
 import net.luis.netcore.packet.listener.*;

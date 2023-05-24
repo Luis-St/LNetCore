@@ -4,8 +4,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.ConnectionInitializer;
-import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.listener.PacketListener;
@@ -95,26 +95,12 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	public <E extends Event> void closeOn(ClosingEvent<E> event) {
 		Objects.requireNonNull(event, "Closing event must not be null");
-		INSTANCE.register(event.getEvent(), evt-> {
+		INSTANCE.register(event.getEvent(), evt -> {
 			if (event.shouldClose(evt)) {
 				this.closeNow();
 			}
 		});
 	}
-	
-	//region Internal listener
-	private static record InternalListener(ClientInstance instance) implements PacketListener {
-		
-		@Override
-		public void initialize(Connection connection) {
-			connection.builder().listener(CloseConnectionPacket.class, (packet) -> this.closeConnection()).register();
-		}
-		
-		private void closeConnection() {
-			this.instance.closeInternal();
-		}
-	}
-	//endregion
 	
 	//region Object overrides
 	@Override
@@ -134,6 +120,20 @@ public class ClientInstance extends AbstractNetworkInstance {
 	@Override
 	public String toString() {
 		return "ClientInstance " + this.connection.getUniqueId();
+	}
+	//endregion
+	
+	//region Internal listener
+	private static record InternalListener(ClientInstance instance) implements PacketListener {
+		
+		@Override
+		public void initialize(Connection connection) {
+			connection.builder().listener(CloseConnectionPacket.class, (packet) -> this.closeConnection()).register();
+		}
+		
+		private void closeConnection() {
+			this.instance.closeInternal();
+		}
 	}
 	//endregion
 }

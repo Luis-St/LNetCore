@@ -20,10 +20,10 @@ import java.util.function.Consumer;
 public class ListenerBuilder {
 	
 	private final Connection connection;
-	protected PacketTarget target = PacketTarget.ANY;
-	protected PacketPriority priority = PacketPriority.NORMAL;
 	private Class<? extends Packet> packetClass = Packet.class;
 	private BiConsumer<Packet, ConnectionContext> consumer;
+	protected PacketTarget target = PacketTarget.ANY;
+	protected PacketPriority priority = PacketPriority.NORMAL;
 	
 	@ApiStatus.Internal
 	public ListenerBuilder(Connection connection) {

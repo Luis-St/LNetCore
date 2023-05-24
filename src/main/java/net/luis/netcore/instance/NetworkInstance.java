@@ -1,7 +1,6 @@
 package net.luis.netcore.instance;
 
 import net.luis.netcore.packet.Packet;
-import net.luis.utils.event.Event;
 
 /**
  *

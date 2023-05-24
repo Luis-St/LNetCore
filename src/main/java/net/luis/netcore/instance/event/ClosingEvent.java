@@ -21,10 +21,6 @@ import static net.luis.netcore.connection.event.ConnectionEventType.*;
 
 public interface ClosingEvent<E extends Event> {
 	
-	@NotNull EventType<E> getEvent();
-	
-	boolean shouldClose(E event);
-	
 	//region Send closing triggers
 	static @NotNull ClosingEvent<SendEvent> closeAfterSent() {
 		return new ClosingEvent<SendEvent>() {
@@ -158,4 +154,8 @@ public interface ClosingEvent<E extends Event> {
 		};
 	}
 	//endregion
+	
+	@NotNull EventType<E> getEvent();
+	
+	boolean shouldClose(E event);
 }

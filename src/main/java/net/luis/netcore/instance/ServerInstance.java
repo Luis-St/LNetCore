@@ -3,9 +3,9 @@ package net.luis.netcore.instance;
 import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.ConnectionInitializer;
+import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.impl.action.CloseServerPacket;
@@ -80,6 +80,27 @@ public class ServerInstance extends AbstractNetworkInstance {
 		LOGGER.info("Server closed");
 	}
 	
+	//region Object overrides
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof ServerInstance that)) return false;
+		if (!super.equals(o)) return false;
+		
+		return this.connections.equals(that.connections);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), this.connections);
+	}
+	
+	@Override
+	public String toString() {
+		return "ServerInstance";
+	}
+	//endregion
+	
 	//region Internal listener
 	private static record InternalListener(ServerInstance instance, SocketAddress address, UUID uniqueId) implements PacketListener {
 		
@@ -103,27 +124,6 @@ public class ServerInstance extends AbstractNetworkInstance {
 			}
 			this.instance.closeNow();
 		}
-	}
-	//endregion
-	
-	//region Object overrides
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof ServerInstance that)) return false;
-		if (!super.equals(o)) return false;
-		
-		return this.connections.equals(that.connections);
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), this.connections);
-	}
-	
-	@Override
-	public String toString() {
-		return "ServerInstance";
 	}
 	//endregion
 }

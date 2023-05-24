@@ -10,7 +10,7 @@ import net.luis.utils.event.EventType;
  */
 
 public interface ConnectionEventType {
-
+	
 	EventType<OpenEvent> OPEN = new EventType<>("open");
 	EventType<HandshakeEvent> HANDSHAKE = new EventType<>("handshake");
 	EventType<SendEvent> SEND = new EventType<>("send");
