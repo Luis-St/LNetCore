@@ -39,8 +39,8 @@ public final class PacketTarget implements Encodable {
 	
 	public static @NotNull PacketTarget of(FriendlyByteBuffer buffer) {
 		Objects.requireNonNull(buffer, "Buffer must not be null");
-		int target = buffer.readInt();
 		String name = buffer.readString();
+		int target = buffer.readInt();
 		return switch (target) {
 			case -1 -> INTERNAL;
 			case 0 -> ANY;
