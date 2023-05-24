@@ -1,10 +1,10 @@
 package net.luis.netcore;
 
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.util.ConnectionContext;
+import net.luis.netcore.connection.ConnectionContext;
 import net.luis.netcore.instance.ClientInstance;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.action.CloseServerPacket;
+import net.luis.netcore.packet.impl.internal.CloseServerPacket;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
@@ -33,7 +33,7 @@ public class ClientTest {
 	
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.registerListener(new Listener());
-		LOGGER.info("Initialized client connection {}", connection.getUniqueId());
+		LOGGER.info("Initialized client connection");
 	}
 	
 	public static class Listener implements PacketListener {

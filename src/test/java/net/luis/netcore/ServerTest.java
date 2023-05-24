@@ -26,6 +26,6 @@ public class ServerTest {
 	
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.builder().listener((packet, ctx) -> ctx.sendPacket(new StringPacket("You sent " + packet).withTarget(4))).register();
-		LOGGER.info("Initialized server connection {}", connection.getUniqueId());
+		LOGGER.info("Initialized server connection");
 	}
 }

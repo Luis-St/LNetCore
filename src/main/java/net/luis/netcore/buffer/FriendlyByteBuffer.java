@@ -94,8 +94,8 @@ public final class FriendlyByteBuffer {
 		this.buffer.writeCharSequence(value, Charset.defaultCharset());
 	}
 	
-	public void writeUUID(UUID value) {
-		Objects.requireNonNull(value, "UUID must not be null");
+	public void writeUniqueId(UUID value) {
+		Objects.requireNonNull(value, "Unique id must not be null");
 		this.writeLong(value.getMostSignificantBits());
 		this.writeLong(value.getLeastSignificantBits());
 	}
@@ -124,7 +124,7 @@ public final class FriendlyByteBuffer {
 		return this.buffer.readCharSequence(length, StandardCharsets.UTF_8).toString();
 	}
 	
-	public @NotNull UUID readUUID() {
+	public @NotNull UUID readUniqueId() {
 		long most = this.readLong();
 		long least = this.readLong();
 		UUID uuid = new UUID(most, least);

@@ -103,12 +103,12 @@ public class PacketRegistry {
 	
 	static {
 		register(ActionPacket.class);
-		register(CloseConnectionPacket.class);
-		register(InitializeConnectionPacket.class);
-		register(CloseServerPacket.class);
 		register(DataPacket.class);
 		register(ListPacket.class);
 		register(MapPacket.class);
+		register(CloseConnectionPacket.class);
+		register(CloseServerPacket.class);
+		register(InitializeConnectionPacket.class);
 		register(InfoPacket.class);
 		register(ErrorPacket.class);
 		register(BooleanPacket.class);
