@@ -1,11 +1,11 @@
-package net.luis.netcore.network;
+package net.luis.netcore.connection.channel;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import net.luis.netcore.network.connection.ConnectionFactory;
+import net.luis.netcore.connection.ConnectionFactory;
 import net.luis.netcore.packet.PacketDecoder;
 import net.luis.netcore.packet.PacketEncoder;
 import org.jetbrains.annotations.NotNull;

@@ -1,10 +1,11 @@
-package net.luis.netcore.network.connection;
+package net.luis.netcore.connection;
 
 import com.google.common.collect.Lists;
 import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
+import net.luis.netcore.connection.event.impl.*;
 import net.luis.netcore.exception.SkipPacketException;
-import net.luis.netcore.network.connection.event.impl.*;
+import net.luis.netcore.connection.event.impl.*;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.filter.PacketFilter;
 import net.luis.netcore.packet.listener.*;
@@ -19,9 +20,9 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import static io.netty.channel.ChannelFutureListener.*;
-import static net.luis.netcore.network.connection.event.ConnectionEventManager.*;
-import static net.luis.netcore.network.connection.event.ConnectionEventType.CLOSE;
-import static net.luis.netcore.network.connection.event.ConnectionEventType.*;
+import static net.luis.netcore.connection.event.ConnectionEventManager.*;
+import static net.luis.netcore.connection.event.ConnectionEventType.CLOSE;
+import static net.luis.netcore.connection.event.ConnectionEventType.*;
 
 /**
  *
@@ -62,7 +63,9 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		if (packet.bypassEvent(SEND)) {
 			this.sendInternal(packet);
-			LOGGER.debug("{} bypassed event '{}'", packet.getClass().getSimpleName(), SEND.name());
+			if (!packet.isInternal()) {
+				LOGGER.debug("Non-internal {} bypassed event '{}'", packet.getClass().getSimpleName(), SEND.name());
+			}
 			return;
 		}
 		SendEvent event = new SendEvent(this.uniqueId, packet);
@@ -190,8 +193,8 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 			if (!event.isHandled()) {
 				LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
 			}
-		} else {
-			LOGGER.debug("{} bypassed event '{}'", packet.getClass().getSimpleName(), RECEIVE.name());
+		} else if (!packet.isInternal()) {
+			LOGGER.debug("Non-internal {} bypassed event '{}'", packet.getClass().getSimpleName(), RECEIVE.name());
 		}
 	}
 	

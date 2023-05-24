@@ -1,4 +1,4 @@
-package net.luis.netcore.network.connection;
+package net.luis.netcore.connection;
 
 import net.luis.netcore.packet.Packet;
 
@@ -16,7 +16,7 @@ public class ConnectionContext {
 	private final UUID uniqueId;
 	private final Consumer<Packet> sender;
 	
-	public ConnectionContext(UUID uniqueId, Consumer<Packet> sender) {
+	ConnectionContext(UUID uniqueId, Consumer<Packet> sender) {
 		this.uniqueId = uniqueId;
 		this.sender = sender;
 	}

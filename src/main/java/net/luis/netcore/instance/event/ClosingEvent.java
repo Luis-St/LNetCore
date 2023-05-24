@@ -1,8 +1,8 @@
-package net.luis.netcore.network.instance;
+package net.luis.netcore.instance.event;
 
 import com.google.common.collect.Maps;
-import net.luis.netcore.network.connection.event.impl.ReceiveEvent;
-import net.luis.netcore.network.connection.event.impl.SendEvent;
+import net.luis.netcore.connection.event.impl.ReceiveEvent;
+import net.luis.netcore.connection.event.impl.SendEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.utils.event.Event;
 import net.luis.utils.event.EventType;
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.UUID;
 
-import static net.luis.netcore.network.connection.event.ConnectionEventType.*;
+import static net.luis.netcore.connection.event.ConnectionEventType.*;
 
 /**
  *
@@ -19,17 +19,17 @@ import static net.luis.netcore.network.connection.event.ConnectionEventType.*;
  *
  */
 
-public interface ClosingTrigger<E extends Event> {
+public interface ClosingEvent<E extends Event> {
 	
-	@NotNull EventType<E> getTrigger();
+	@NotNull EventType<E> getEvent();
 	
 	boolean shouldClose(E event);
 	
 	//region Send closing triggers
-	static @NotNull ClosingTrigger<SendEvent> closeAfterSent() {
-		return new ClosingTrigger<SendEvent>() {
+	static @NotNull ClosingEvent<SendEvent> closeAfterSent() {
+		return new ClosingEvent<SendEvent>() {
 			@Override
-			public @NotNull EventType<SendEvent> getTrigger() {
+			public @NotNull EventType<SendEvent> getEvent() {
 				return SEND;
 			}
 			
@@ -40,10 +40,10 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<SendEvent> closeAfterSent(Class<? extends Packet> packet) {
-		return new ClosingTrigger<SendEvent>() {
+	static @NotNull ClosingEvent<SendEvent> closeAfterSent(Class<? extends Packet> packet) {
+		return new ClosingEvent<SendEvent>() {
 			@Override
-			public @NotNull EventType<SendEvent> getTrigger() {
+			public @NotNull EventType<SendEvent> getEvent() {
 				return SEND;
 			}
 			
@@ -54,12 +54,12 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<SendEvent> closeAfterSent(int packets) {
-		return new ClosingTrigger<SendEvent>() {
+	static @NotNull ClosingEvent<SendEvent> closeAfterSent(int packets) {
+		return new ClosingEvent<SendEvent>() {
 			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
-			public @NotNull EventType<SendEvent> getTrigger() {
+			public @NotNull EventType<SendEvent> getEvent() {
 				return SEND;
 			}
 			
@@ -71,12 +71,12 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<SendEvent> closeAfterSent(Class<? extends Packet> packet, int packets) {
-		return new ClosingTrigger<SendEvent>() {
+	static @NotNull ClosingEvent<SendEvent> closeAfterSent(Class<? extends Packet> packet, int packets) {
+		return new ClosingEvent<SendEvent>() {
 			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
-			public @NotNull EventType<SendEvent> getTrigger() {
+			public @NotNull EventType<SendEvent> getEvent() {
 				return SEND;
 			}
 			
@@ -93,10 +93,10 @@ public interface ClosingTrigger<E extends Event> {
 	//endregion
 	
 	//region Receive closing triggers
-	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived() {
-		return new ClosingTrigger<ReceiveEvent>() {
+	static @NotNull ClosingEvent<ReceiveEvent> closeAfterReceived() {
+		return new ClosingEvent<ReceiveEvent>() {
 			@Override
-			public @NotNull EventType<ReceiveEvent> getTrigger() {
+			public @NotNull EventType<ReceiveEvent> getEvent() {
 				return RECEIVE;
 			}
 			
@@ -107,10 +107,10 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived(Class<? extends Packet> packet) {
-		return new ClosingTrigger<ReceiveEvent>() {
+	static @NotNull ClosingEvent<ReceiveEvent> closeAfterReceived(Class<? extends Packet> packet) {
+		return new ClosingEvent<ReceiveEvent>() {
 			@Override
-			public @NotNull EventType<ReceiveEvent> getTrigger() {
+			public @NotNull EventType<ReceiveEvent> getEvent() {
 				return RECEIVE;
 			}
 			
@@ -121,12 +121,12 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived(int packets) {
-		return new ClosingTrigger<ReceiveEvent>() {
+	static @NotNull ClosingEvent<ReceiveEvent> closeAfterReceived(int packets) {
+		return new ClosingEvent<ReceiveEvent>() {
 			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
-			public @NotNull EventType<ReceiveEvent> getTrigger() {
+			public @NotNull EventType<ReceiveEvent> getEvent() {
 				return RECEIVE;
 			}
 			
@@ -138,12 +138,12 @@ public interface ClosingTrigger<E extends Event> {
 		};
 	}
 	
-	static @NotNull ClosingTrigger<ReceiveEvent> closeAfterReceived(Class<? extends Packet> packet, int packets) {
-		return new ClosingTrigger<ReceiveEvent>() {
+	static @NotNull ClosingEvent<ReceiveEvent> closeAfterReceived(Class<? extends Packet> packet, int packets) {
+		return new ClosingEvent<ReceiveEvent>() {
 			private final Map<UUID, Integer> hits = Maps.newHashMap();
 			
 			@Override
-			public @NotNull EventType<ReceiveEvent> getTrigger() {
+			public @NotNull EventType<ReceiveEvent> getEvent() {
 				return RECEIVE;
 			}
 			

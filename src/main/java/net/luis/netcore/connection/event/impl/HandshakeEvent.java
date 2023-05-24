@@ -1,4 +1,4 @@
-package net.luis.netcore.network.connection.event.impl;
+package net.luis.netcore.connection.event.impl;
 
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.NotNull;

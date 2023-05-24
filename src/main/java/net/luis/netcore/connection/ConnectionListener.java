@@ -1,4 +1,4 @@
-package net.luis.netcore.network.connection;
+package net.luis.netcore.connection;
 
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketPriority;
@@ -7,7 +7,6 @@ import net.luis.netcore.packet.listener.PacketTarget;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  *

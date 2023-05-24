@@ -1,10 +1,11 @@
-package net.luis.netcore.network.instance;
+package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.network.SimpleChannelInitializer;
-import net.luis.netcore.network.connection.Connection;
-import net.luis.netcore.network.connection.ConnectionInitializer;
+import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionInitializer;
+import net.luis.netcore.instance.event.ClosingEvent;
+import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.listener.PacketListener;
@@ -16,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Objects;
 import java.util.Optional;
 
-import static net.luis.netcore.network.connection.event.ConnectionEventManager.*;
+import static net.luis.netcore.connection.event.ConnectionEventManager.*;
 
 /**
  *
@@ -92,10 +93,10 @@ public class ClientInstance extends AbstractNetworkInstance {
 		LOGGER.info("Client closed");
 	}
 	
-	public <E extends Event> void closeOn(ClosingTrigger<E> trigger) {
-		Objects.requireNonNull(trigger, "Closing trigger must not be null");
-		INSTANCE.register(trigger.getTrigger(), event -> {
-			if (trigger.shouldClose(event)) {
+	public <E extends Event> void closeOn(ClosingEvent<E> event) {
+		Objects.requireNonNull(event, "Closing event must not be null");
+		INSTANCE.register(event.getEvent(), evt-> {
+			if (event.shouldClose(evt)) {
 				this.closeNow();
 			}
 		});

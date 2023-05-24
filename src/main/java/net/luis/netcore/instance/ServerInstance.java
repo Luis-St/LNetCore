@@ -1,11 +1,11 @@
-package net.luis.netcore.network.instance;
+package net.luis.netcore.instance;
 
 import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import net.luis.netcore.network.SimpleChannelInitializer;
-import net.luis.netcore.network.connection.Connection;
-import net.luis.netcore.network.connection.ConnectionInitializer;
+import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
 import net.luis.netcore.packet.impl.action.CloseServerPacket;

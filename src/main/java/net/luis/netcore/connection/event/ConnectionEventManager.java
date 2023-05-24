@@ -1,9 +1,6 @@
-package net.luis.netcore.network.connection.event;
+package net.luis.netcore.connection.event;
 
-import net.luis.netcore.network.instance.ClosingTrigger;
 import net.luis.utils.event.*;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 

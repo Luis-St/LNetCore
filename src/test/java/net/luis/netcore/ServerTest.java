@@ -1,8 +1,7 @@
 package net.luis.netcore;
 
-import net.luis.netcore.network.instance.ServerInstance;
-import net.luis.netcore.network.connection.Connection;
-import net.luis.netcore.packet.Packet;
+import net.luis.netcore.instance.ServerInstance;
+import net.luis.netcore.connection.Connection;
 import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.utils.logging.LoggingUtils;
 import org.apache.logging.log4j.LogManager;

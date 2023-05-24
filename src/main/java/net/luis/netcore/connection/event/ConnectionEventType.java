@@ -1,6 +1,6 @@
-package net.luis.netcore.network.connection.event;
+package net.luis.netcore.connection.event;
 
-import net.luis.netcore.network.connection.event.impl.*;
+import net.luis.netcore.connection.event.impl.*;
 import net.luis.utils.event.EventType;
 
 /**

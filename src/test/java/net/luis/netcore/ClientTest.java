@@ -1,13 +1,11 @@
 package net.luis.netcore;
 
-import net.luis.netcore.network.connection.Connection;
-import net.luis.netcore.network.connection.ConnectionContext;
-import net.luis.netcore.network.instance.ClientInstance;
-import net.luis.netcore.network.instance.ClosingTrigger;
+import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionContext;
+import net.luis.netcore.instance.ClientInstance;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseServerPacket;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
-import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.*;
 import net.luis.utils.logging.LoggingUtils;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +27,7 @@ public class ClientTest {
 		ClientInstance client = new ClientInstance(ClientTest::initializeConnection);
 		client.handshake(new IntegerPacket(10));
 		client.open("localhost", 8080);
-		//client.closeOn(ClosingTrigger.closeAfterReceived(StringPacket.class));
+		//client.closeOn(ClosingEvent.closeAfterReceived(StringPacket.class));
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {

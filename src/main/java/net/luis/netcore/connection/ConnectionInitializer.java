@@ -1,4 +1,4 @@
-package net.luis.netcore.network.connection;
+package net.luis.netcore.connection;
 
 /**
  *

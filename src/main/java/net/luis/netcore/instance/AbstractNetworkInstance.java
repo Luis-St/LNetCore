@@ -1,4 +1,4 @@
-package net.luis.netcore.network.instance;
+package net.luis.netcore.instance;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.channel.EventLoopGroup;
