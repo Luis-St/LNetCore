@@ -1,7 +1,6 @@
 package net.luis.netcore.packet.listener;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
-import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,25 +12,18 @@ import java.util.Objects;
  *
  */
 
-public final class PacketTarget implements Encodable, Decodable {
+public final class PacketTarget implements Encodable {
 	
-	public static final PacketTarget ANY = new PacketTarget("any", -1);
-	public static final PacketTarget HANDSHAKE = new PacketTarget("handshake", 0);
+	public static final PacketTarget INTERNAL = new PacketTarget("internal", -1);
+	public static final PacketTarget ANY = new PacketTarget("any", 0);
+	public static final PacketTarget HANDSHAKE = new PacketTarget("handshake", 1);
 	
 	private final String name;
 	private final int target;
 	
-	public PacketTarget(String name, int target) {
+	private PacketTarget(String name, int target) {
 		this.name = Objects.requireNonNull(name, "Name must not be null");
 		this.target = target;
-		if (this.target < -1) {
-			throw new IllegalArgumentException("Target must be greater than -2");
-		}
-	}
-	
-	public PacketTarget(@NotNull FriendlyByteBuffer buffer) {
-		this.name = buffer.readString();
-		this.target = buffer.readInt();
 	}
 	
 	public static @NotNull PacketTarget of(int target) {
@@ -39,7 +31,22 @@ public final class PacketTarget implements Encodable, Decodable {
 	}
 	
 	public static @NotNull PacketTarget of(String name, int target) {
+		if (2 > target) {
+			throw new IllegalArgumentException("Target must be greater than or equal to 2");
+		}
 		return new PacketTarget(name, target);
+	}
+	
+	public static @NotNull PacketTarget of(FriendlyByteBuffer buffer) {
+		Objects.requireNonNull(buffer, "Buffer must not be null");
+		int target = buffer.readInt();
+		String name = buffer.readString();
+		return switch (target) {
+			case -1 -> INTERNAL;
+			case 0 -> ANY;
+			case 1 -> HANDSHAKE;
+			default -> of(name, target);
+		};
 	}
 	
 	public @NotNull String getName() {
@@ -50,8 +57,12 @@ public final class PacketTarget implements Encodable, Decodable {
 		return this.target;
 	}
 	
+	public boolean isInternal() {
+		return this.target == -1 || this == INTERNAL;
+	}
+	
 	public boolean isAny() {
-		return this.target == -1 || this == ANY;
+		return this.target == 0 || this == ANY;
 	}
 	
 	@Override

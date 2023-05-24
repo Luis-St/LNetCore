@@ -30,22 +30,23 @@ public final class PacketDecoder extends ByteToMessageDecoder {
 		if (i != 0) {
 			FriendlyByteBuffer buffer = new FriendlyByteBuffer(input);
 			int id = buffer.readInt();
-			PacketTarget target = buffer.read(PacketTarget.class);
-			Packet packet = PacketRegistry.getPacket(id, buffer);
+			PacketTarget target = PacketTarget.of(buffer);
+			Packet packet = PacketRegistry.getPacket(id, buffer, target);
 			if (packet == null) {
 				LOGGER.error("Failed to get packet for id {}", id);
 				throw new IllegalStateException("Failed to get packet for id " + id);
+			} else if (!packet.isInternal() && target.isInternal()) {
+				throw new IllegalStateException(packet + " is non-internal but was sent to a internal target");
 			} else {
 				int readableBytes = buffer.readableBytes();
 				if (readableBytes > 0) {
 					if (packet.skippable()) {
-						LOGGER.warn("Packet was too big than expected, found {} extra bytes while reading packet {} with id {}", readableBytes, packet, id);
+						LOGGER.warn("{} with id {} was too big than expected, found {} extra bytes while reading", packet, id, readableBytes);
 						throw new SkipPacketException();
 					} else {
-						throw new IOException("Packet was too big than expected, found " + readableBytes + " extra bytes while reading packet " + packet + " with id " + id);
+						throw new IOException(packet + " with id " + id + " was too big than expected, found " + readableBytes + " extra bytes while reading");
 					}
 				} else {
-					packet.withTarget(target);
 					output.add(packet);
 				}
 			}

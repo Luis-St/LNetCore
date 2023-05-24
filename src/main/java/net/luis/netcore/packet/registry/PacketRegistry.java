@@ -11,6 +11,7 @@ import net.luis.netcore.packet.impl.data.MapPacket;
 import net.luis.netcore.packet.impl.message.ErrorPacket;
 import net.luis.netcore.packet.impl.message.InfoPacket;
 import net.luis.netcore.packet.impl.value.*;
+import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.util.unsafe.classpath.ClassPathUtils;
 import net.luis.utils.util.unsafe.reflection.ReflectionHelper;
 import org.apache.logging.log4j.LogManager;
@@ -58,13 +59,13 @@ public class PacketRegistry {
 		return -1;
 	}
 	
-	public static Packet getPacket(int id, @NotNull FriendlyByteBuffer buffer) {
+	public static Packet getPacket(int id, @NotNull FriendlyByteBuffer buffer, PacketTarget target) {
 		Class<? extends Packet> clazz = byId(id);
 		if (clazz != null) {
 			try {
 				if (ReflectionHelper.hasConstructor(clazz, FriendlyByteBuffer.class)) {
 					Constructor<? extends Packet> constructor = ReflectionHelper.getConstructor(clazz, FriendlyByteBuffer.class);
-					return Objects.requireNonNull(constructor).newInstance(buffer);
+					return constructor.newInstance(buffer).withTarget(target);
 				} else {
 					LOGGER.error("Packet {} does not have a constructor with FriendlyByteBuffer as parameter", clazz.getSimpleName());
 					throw new InvalidPacketException("Packet " + clazz.getSimpleName() + " does not have a FriendlyByteBuffer constructor");
@@ -105,7 +106,7 @@ public class PacketRegistry {
 		register(ActionPacket.class);
 		register(CloseConnectionPacket.class);
 		register(InitializeConnectionPacket.class);
-		register(ServerClosePacket.class);
+		register(CloseServerPacket.class);
 		register(DataPacket.class);
 		register(ListPacket.class);
 		register(MapPacket.class);

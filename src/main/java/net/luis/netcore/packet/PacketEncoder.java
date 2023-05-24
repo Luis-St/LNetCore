@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.SkipPacketException;
+import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.netcore.packet.registry.PacketRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +32,7 @@ public final class PacketEncoder extends MessageToByteEncoder<Packet> {
 		} else {
 			FriendlyByteBuffer buffer = new FriendlyByteBuffer(output);
 			buffer.writeInt(id);
-			buffer.write(packet.getTarget());
+			packet.getTarget().encode(buffer);
 			try {
 				int startSize = buffer.writerIndex();
 				packet.encode(buffer);
