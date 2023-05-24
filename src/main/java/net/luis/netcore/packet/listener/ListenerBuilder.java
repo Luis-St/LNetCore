@@ -1,7 +1,7 @@
 package net.luis.netcore.packet.listener;
 
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionContext;
+import net.luis.netcore.connection.util.ConnectionContext;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

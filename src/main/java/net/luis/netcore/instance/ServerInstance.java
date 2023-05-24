@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionInitializer;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseConnectionPacket;

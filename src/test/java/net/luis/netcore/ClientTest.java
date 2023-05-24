@@ -1,7 +1,7 @@
 package net.luis.netcore;
 
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionContext;
+import net.luis.netcore.connection.util.ConnectionContext;
 import net.luis.netcore.instance.ClientInstance;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.action.CloseServerPacket;

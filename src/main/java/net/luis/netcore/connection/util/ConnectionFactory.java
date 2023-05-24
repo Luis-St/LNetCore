@@ -1,6 +1,7 @@
-package net.luis.netcore.connection;
+package net.luis.netcore.connection.util;
 
 import io.netty.channel.Channel;
+import net.luis.netcore.connection.Connection;
 
 /**
  *

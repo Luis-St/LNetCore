@@ -1,5 +1,6 @@
 package net.luis.netcore.connection;
 
+import net.luis.netcore.connection.util.ConnectionContext;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketPriority;
 import net.luis.netcore.packet.listener.PacketTarget;

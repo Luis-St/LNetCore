@@ -3,7 +3,7 @@ package net.luis.netcore.instance;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionInitializer;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;

@@ -3,7 +3,7 @@ package net.luis.netcore.connection.channel;
 import io.netty.channel.*;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import net.luis.netcore.connection.ConnectionFactory;
+import net.luis.netcore.connection.util.ConnectionFactory;
 import net.luis.netcore.packet.PacketDecoder;
 import net.luis.netcore.packet.PacketEncoder;
 import org.jetbrains.annotations.NotNull;

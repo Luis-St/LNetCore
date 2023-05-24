@@ -1,4 +1,6 @@
-package net.luis.netcore.connection;
+package net.luis.netcore.connection.util;
+
+import net.luis.netcore.connection.Connection;
 
 /**
  *
