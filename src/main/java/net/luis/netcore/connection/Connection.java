@@ -11,7 +11,6 @@ import net.luis.netcore.packet.listener.*;
 import net.luis.utils.collection.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -29,35 +28,43 @@ import static net.luis.netcore.connection.event.ConnectionEventType.*;
  *
  */
 
-public final class Connection extends SimpleChannelInboundHandler<Packet> {
+public sealed abstract class Connection extends SimpleChannelInboundHandler<Packet> permits ClientConnection, ServerConnection {
 	
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
-	private final UUID uniqueId = UUID.randomUUID();
 	private final Registry<ConnectionListener> listeners = Registry.of();
 	private final Registry<PacketFilter> filters = Registry.of();
-	private final Channel channel;
-	private final Optional<Packet> handshake;
+	protected final Channel channel;
+	protected final Optional<Packet> handshake;
+	private UUID uniqueId = null;
 	
-	@ApiStatus.Internal
-	public Connection(Channel channel) {
-		this(channel, Optional.empty());
-	}
-	
-	@ApiStatus.Internal
-	public Connection(Channel channel, Optional<Packet> handshake) {
+	protected Connection(Channel channel, Optional<Packet> handshake) {
 		this.channel = Objects.requireNonNull(channel, "Channel must not be null");
 		this.handshake = Objects.requireNonNull(handshake, "Handshake must not be null");
 	}
 	
-	public @NotNull UUID getUniqueId() {
-		return this.uniqueId;
+	protected Connection(UUID uniqueId, Channel channel) {
+		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
+		this.channel = Objects.requireNonNull(channel, "Channel must not be null");
+		this.handshake = Optional.empty();
+	}
+	
+	@NotNull UUID getUniqueId() {
+		return Objects.requireNonNull(this.uniqueId, "Unique id has not been initialized yet");
+	}
+	
+	void setUniqueId(UUID uniqueId) {
+		if (this.uniqueId != null) {
+			throw new IllegalStateException("Unique id is already set");
+		}
+		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
 	}
 	
 	public boolean isOpen() {
 		return this.channel.isOpen();
 	}
 	
+	//region Sending packets
 	public void send(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		if (packet.bypassEvent(SEND)) {
@@ -78,23 +85,14 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
 		LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 	}
+	//endregion
 	
 	//region Netty overrides
 	@Override
-	public void channelActive(ChannelHandlerContext context) {
-		INSTANCE.dispatch(OPEN, new OpenEvent(this.uniqueId));
-		this.handshake.filter(handshake -> !handshake.isInternal()).ifPresent(handshake -> {
-			HandshakeEvent event = new HandshakeEvent(this.uniqueId, handshake);
-			INSTANCE.dispatch(HANDSHAKE, event);
-			if (!event.isCancelled()) {
-				this.channel.writeAndFlush(event.getPacket().withTarget(PacketTarget.HANDSHAKE)).addListener(CLOSE_ON_FAILURE);
-				LOGGER.debug("Sent handshake {}", event.getPacket().getClass().getSimpleName());
-			}
-		});
-	}
+	public abstract void channelActive(ChannelHandlerContext ctx);
 	
 	@Override
-	protected void channelRead0(ChannelHandlerContext context, Packet packet) {
+	protected void channelRead0(ChannelHandlerContext ctx, Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		try {
 			LOGGER.debug("Received {}", packet);
@@ -109,7 +107,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	@Override
-	public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		if (cause instanceof SkipPacketException e) {
 			LOGGER.info("Skipping packet", e);
 		} else if (this.channel.isOpen()) {
@@ -125,7 +123,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	@Override
-	public void channelInactive(ChannelHandlerContext context) throws Exception {
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		INSTANCE.dispatch(CLOSE, new CloseEvent(this.uniqueId));
 	}
 	//endregion

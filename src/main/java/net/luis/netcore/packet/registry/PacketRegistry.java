@@ -109,6 +109,7 @@ public class PacketRegistry {
 		register(CloseConnectionPacket.class);
 		register(CloseServerPacket.class);
 		register(InitializeConnectionPacket.class);
+		register(SyncServerDataPacket.class);
 		register(InfoPacket.class);
 		register(ErrorPacket.class);
 		register(BooleanPacket.class);

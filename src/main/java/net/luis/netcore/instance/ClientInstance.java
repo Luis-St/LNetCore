@@ -2,12 +2,13 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import net.luis.netcore.connection.ClientConnection;
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
+import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.event.Event;
@@ -29,9 +30,9 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)
-	 *  - unique id of connection should be server and client the same
-	 *  - avoid exposing the connection to the initializer
+	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)<br>
+	 *  - avoid exposing the connection to the initializer<br>
+	 *  - moved ConnectionInitializer call after unique id has been set
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -58,7 +59,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 		try {
 			LOGGER.debug("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
-				this.connection = new Connection(channel, Optional.ofNullable(this.handshake));
+				this.connection = new ClientConnection(channel, Optional.ofNullable(this.handshake));
 				this.connection.registerListener(new InternalListener(this));
 				this.initializer.initialize(this.connection);
 				this.initialized = true;
@@ -119,7 +120,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	@Override
 	public String toString() {
-		return "ClientInstance " + this.connection.getUniqueId();
+		return "ClientInstance";
 	}
 	//endregion
 	

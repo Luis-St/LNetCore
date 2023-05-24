@@ -4,11 +4,12 @@ import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.util.ConnectionInitializer;
+import net.luis.netcore.connection.ServerConnection;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.action.CloseConnectionPacket;
-import net.luis.netcore.packet.impl.action.CloseServerPacket;
+import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
+import net.luis.netcore.packet.impl.internal.CloseServerPacket;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +28,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ServerInstance.class);
 	
-	private final Map<UUID, Connection> connections = Maps.newHashMap();
+	private final Map<UUID, ServerConnection> connections = Maps.newHashMap();
 	private final ConnectionInitializer initializer;
 	
 	public ServerInstance() {
@@ -45,7 +46,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 		try {
 			LOGGER.debug("Starting server");
 			new ServerBootstrap().group(this.buildGroup("server connection #%d")).channel(NioServerSocketChannel.class).childHandler(new SimpleChannelInitializer(channel -> {
-				Connection connection = new Connection(channel);
+				ServerConnection connection = new ServerConnection(channel);
 				connection.registerListener(new InternalListener(this, channel.remoteAddress(), connection.getUniqueId()));
 				this.initializer.initialize(connection);
 				this.connections.put(connection.getUniqueId(), connection);
