@@ -77,6 +77,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 		LOGGER.info("Server closed");
 	}
 	
+	//region Internal listener
 	private static record InternalListener(ServerInstance instance, SocketAddress address, UUID uniqueId) implements PacketListener {
 		
 		@Override
@@ -100,6 +101,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 			this.instance.closeNow();
 		}
 	}
+	//endregion
 	
 	//region Object overrides
 	@Override

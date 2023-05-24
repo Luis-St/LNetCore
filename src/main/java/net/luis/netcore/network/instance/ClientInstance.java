@@ -26,8 +26,9 @@ import static net.luis.netcore.network.connection.event.ConnectionEventManager.*
 public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
-	 * TODO:
-	 *  - add support for default builders -> target and priority can be set for all builders
+	 * TODO:<br>
+	 *  - add better test
+	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -90,13 +91,14 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	public <E extends Event> void closeOn(ClosingTrigger<E> trigger) {
 		Objects.requireNonNull(trigger, "Closing trigger must not be null");
-		INSTANCE.register(trigger.getTrigger(), (type, event) -> {
+		INSTANCE.register(trigger.getTrigger(), event -> {
 			if (trigger.shouldClose(event)) {
 				this.closeNow();
 			}
 		});
 	}
 	
+	//region Internal listener
 	private static record InternalListener(ClientInstance instance) implements PacketListener {
 		
 		@Override
@@ -108,6 +110,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 			this.instance.closeInternal();
 		}
 	}
+	//endregion
 	
 	//region Object overrides
 	@Override

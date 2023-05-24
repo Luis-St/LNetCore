@@ -59,19 +59,28 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 	}
 	
 	public void send(Packet packet) {
+		Objects.requireNonNull(packet, "Packet must not be null");
+		if (packet.bypassEvent(SEND)) {
+			this.sendInternal(packet);
+			return;
+		}
 		SendEvent event = new SendEvent(this.uniqueId, packet);
 		INSTANCE.dispatch(SEND, event);
-		if (packet.isInternal() || !event.isCancelled()) {
-			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
-			LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
+		if (!event.isCancelled()) {
+			this.sendInternal(event.getPacket());
 		}
+	}
+	
+	private void sendInternal(Packet packet) {
+		this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
+		LOGGER.debug("Sent {}", packet.getClass().getSimpleName());
 	}
 	
 	//region Netty overrides
 	@Override
 	public void channelActive(ChannelHandlerContext context) {
-		this.handshake.ifPresent(handshake -> {
 		INSTANCE.dispatch(OPEN, new OpenEvent(this.uniqueId));
+		this.handshake.filter(handshake -> !handshake.isInternal()).ifPresent(handshake -> {
 			HandshakeEvent event = new HandshakeEvent(this.uniqueId, handshake);
 			INSTANCE.dispatch(HANDSHAKE, event);
 			if (!event.isCancelled()) {
@@ -86,7 +95,7 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		try {
 			LOGGER.debug("Received {}", packet);
-			if (this.filters.getItems().stream().anyMatch(filter -> filter.filter(packet))) {
+			if (!packet.isInternal() && this.filters.getItems().stream().anyMatch(filter -> filter.filter(packet))) {
 				LOGGER.debug("{} with target '{}' was filtered", packet.getClass().getSimpleName(), packet.getTarget().getName());
 			} else {
 				this.callListeners(packet);
@@ -162,10 +171,12 @@ public final class Connection extends SimpleChannelInboundHandler<Packet> {
 				}
 			}
 		}
-		INSTANCE.dispatch(RECEIVE, event);
-		if (!event.isHandled()) {
-			LOGGER.warn("{} with target '{}' was not handled by any listener and event", packet, packet.getTarget().getName());
+		if (!packet.bypassEvent(RECEIVE)) {
 			ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
+			INSTANCE.dispatch(RECEIVE, event);
+			if (!event.isHandled()) {
+				LOGGER.warn("{} with target '{}' was not handled by any listener and event", packet, packet.getTarget().getName());
+			}
 		}
 	}
 	
