@@ -2,6 +2,7 @@ package net.luis.netcore.packet.impl.action;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
+import net.luis.utils.annotation.Internal;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
+@Internal
 public class InitializeConnectionPacket extends Packet {
 	
 	public InitializeConnectionPacket() {

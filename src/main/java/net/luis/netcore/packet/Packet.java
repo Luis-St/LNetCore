@@ -4,6 +4,7 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.utils.annotation.Internal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -44,6 +45,10 @@ public abstract class Packet implements Encodable, Decodable {
 	
 	public Packet withTarget(int target) {
 		return this.withTarget(PacketTarget.of(target));
+	}
+	
+	public boolean isInternal() {
+		return this.getClass().isAnnotationPresent(Internal.class);
 	}
 	
 	public <T> T getWrapped(PacketWrapper<T> wrapper) {
