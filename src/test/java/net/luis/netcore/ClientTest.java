@@ -33,7 +33,7 @@ public class ClientTest {
 	
 	private static void initializeConnection(@NotNull Connection connection) {
 		connection.registerListener(new Listener());
-		LOGGER.info("Initialized client connection");
+		LOGGER.info("Initialized client connection {}", connection.getUniqueId());
 	}
 	
 	public static class Listener implements PacketListener {

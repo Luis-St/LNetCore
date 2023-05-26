@@ -32,7 +32,8 @@ public class ClientInstance extends AbstractNetworkInstance {
 	 * TODO:<br>
 	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)<br>
 	 *  - avoid exposing the connection to the initializer<br>
-	 *  - moved ConnectionInitializer call after unique id has been set
+	 *  - try to add second internal handler (connection) for internal stuff only -> avoid exposing internal packets
+	 *  - ClientInstance#direct -> should open a connection sending only one packet waits for response and closes the connection -> returns the response
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -59,9 +60,8 @@ public class ClientInstance extends AbstractNetworkInstance {
 		try {
 			LOGGER.debug("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
-				this.connection = new ClientConnection(channel, Optional.ofNullable(this.handshake));
+				this.connection = new ClientConnection(channel, this.initializer, Optional.ofNullable(this.handshake));
 				this.connection.registerListener(new InternalListener(this));
-				this.initializer.initialize(this.connection);
 				this.initialized = true;
 				return this.connection;
 			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();

@@ -46,9 +46,8 @@ public class ServerInstance extends AbstractNetworkInstance {
 		try {
 			LOGGER.debug("Starting server");
 			new ServerBootstrap().group(this.buildGroup("server connection #%d")).channel(NioServerSocketChannel.class).childHandler(new SimpleChannelInitializer(channel -> {
-				ServerConnection connection = new ServerConnection(channel);
+				ServerConnection connection = new ServerConnection(channel, this.initializer);
 				connection.registerListener(new InternalListener(this, channel.remoteAddress(), connection.getUniqueId()));
-				this.initializer.initialize(connection);
 				this.connections.put(connection.getUniqueId(), connection);
 				LOGGER.debug("Client connected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
 				return connection;

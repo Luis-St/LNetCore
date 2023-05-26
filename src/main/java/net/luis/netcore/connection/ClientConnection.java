@@ -4,11 +4,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import net.luis.netcore.connection.event.impl.HandshakeEvent;
 import net.luis.netcore.connection.event.impl.OpenEvent;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.SyncServerDataPacket;
 import net.luis.netcore.packet.listener.PacketTarget;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
@@ -22,12 +24,13 @@ import static net.luis.netcore.connection.event.ConnectionEventType.*;
  *
  */
 
+@ApiStatus.Internal
 public final class ClientConnection extends Connection {
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientConnection.class);
 	
-	public ClientConnection(Channel channel, Optional<Packet> handshake) {
-		super(channel, handshake);
+	public ClientConnection(Channel channel, ConnectionInitializer initializer, Optional<Packet> handshake) {
+		super(channel, initializer, handshake);
 	}
 	
 	//region Netty overrides

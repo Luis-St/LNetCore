@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.connection.event.impl.*;
+import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.filter.PacketFilter;
@@ -34,22 +35,25 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	
 	private final Registry<ConnectionListener> listeners = Registry.of();
 	private final Registry<PacketFilter> filters = Registry.of();
+	private final ConnectionInitializer initializer;
 	protected final Channel channel;
 	protected final Optional<Packet> handshake;
 	private UUID uniqueId = null;
 	
-	protected Connection(Channel channel, Optional<Packet> handshake) {
+	protected Connection(Channel channel, ConnectionInitializer initializer, Optional<Packet> handshake) {
 		this.channel = Objects.requireNonNull(channel, "Channel must not be null");
+		this.initializer = Objects.requireNonNull(initializer, "Initializer must not be null");
 		this.handshake = Objects.requireNonNull(handshake, "Handshake must not be null");
 	}
 	
-	protected Connection(UUID uniqueId, Channel channel) {
-		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
+	protected Connection(UUID uniqueId, Channel channel, ConnectionInitializer initializer) {
 		this.channel = Objects.requireNonNull(channel, "Channel must not be null");
+		this.initializer = Objects.requireNonNull(initializer, "Initializer must not be null");
 		this.handshake = Optional.empty();
+		this.setUniqueId(uniqueId);
 	}
 	
-	@NotNull UUID getUniqueId() {
+	public @NotNull UUID getUniqueId() {
 		return Objects.requireNonNull(this.uniqueId, "Unique id has not been initialized yet");
 	}
 	
@@ -58,6 +62,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 			throw new IllegalStateException("Unique id is already set");
 		}
 		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
+		this.initializer.initialize(this);
 	}
 	
 	public boolean isOpen() {
