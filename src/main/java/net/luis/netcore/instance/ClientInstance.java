@@ -2,13 +2,15 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.*;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
+import net.luis.netcore.packet.listener.PacketPriority;
+import net.luis.netcore.packet.util.PacketWrapper;
 import net.luis.utils.event.Event;
 import net.luis.utils.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +19,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static net.luis.netcore.connection.event.ConnectionEventManager.*;
 
@@ -30,8 +33,8 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - ClientInstance#direct -> should open a connection sending only one packet waits for response and closes the connection -> returns the response<br>
 	 *  - request internal packet -> as send message packet (#requestCloseServer (Client), #requestCloseConnection (Server)) -> using Permissions<br>
+	 *  - exclude internal packets from module-info (packet.impl.internal and connection.internal)<br>
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -48,6 +51,16 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	public ClientInstance(ConnectionInitializer initializer) {
 		this.initializer = initializer;
+	}
+	
+	public static <T extends Packet> void direct(String host, int port, Packet packet, Class<T> responseClass, Consumer<T> listener) {
+		ClientInstance client = new ClientInstance((registry, settings) -> {
+			settings.setEventsAllowed(false);
+			registry.builder().target(packet.getTarget()).listener(responseClass, (response, ctx) -> listener.accept(response)).register();
+		});
+		client.open(host, port);
+		client.send(packet);
+		client.closeOn(ClosingEvent.closeAfterReceived(responseClass));
 	}
 	
 	public void handshake(Packet handshake) {
