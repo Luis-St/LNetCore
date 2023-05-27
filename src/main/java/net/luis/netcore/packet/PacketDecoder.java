@@ -35,8 +35,6 @@ public final class PacketDecoder extends ByteToMessageDecoder {
 			if (packet == null) {
 				LOGGER.error("Failed to get packet for id {}", id);
 				throw new IllegalStateException("Failed to get packet for id " + id);
-			} else if (!packet.isInternal() && target.isInternal()) {
-				throw new IllegalStateException(packet + " is non-internal but was sent to a internal target");
 			} else {
 				int readableBytes = buffer.readableBytes();
 				if (readableBytes > 0) {

@@ -4,8 +4,6 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.listener.PacketTarget;
-import net.luis.utils.annotation.Internal;
-import net.luis.utils.event.EventType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -48,10 +46,6 @@ public abstract class Packet implements Encodable, Decodable {
 	
 	public final boolean isSkippable() {
 		return this.getClass().isAnnotationPresent(Skippable.class);
-	}
-	
-	public final boolean isInternal() {
-		return this.getClass().isAnnotationPresent(Internal.class);
 	}
 	
 	public boolean bypassEvent(EventType<?> type) {

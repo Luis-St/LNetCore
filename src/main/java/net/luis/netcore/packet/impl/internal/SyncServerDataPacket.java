@@ -1,8 +1,7 @@
 package net.luis.netcore.packet.impl.internal;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
-import net.luis.netcore.packet.Packet;
-import net.luis.utils.annotation.Internal;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -13,8 +12,8 @@ import java.util.UUID;
  *
  */
 
-@Internal
-public class SyncServerDataPacket extends Packet {
+@ApiStatus.Internal
+public final class SyncServerDataPacket extends InternalPacket {
 	
 	private final UUID uniqueId;
 	

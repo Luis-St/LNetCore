@@ -1,8 +1,7 @@
 package net.luis.netcore.packet.impl.internal;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
-import net.luis.netcore.packet.Packet;
-import net.luis.utils.annotation.Internal;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,19 +10,14 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 
-@Internal
-public class CloseConnectionPacket extends Packet {
+@ApiStatus.Internal
+public final class CloseConnectionPacket extends InternalPacket {
 	
 	public CloseConnectionPacket() {
 	
 	}
 	
 	public CloseConnectionPacket(@NotNull FriendlyByteBuffer buffer) {
-	
-	}
-	
-	@Override
-	public void encode(@NotNull FriendlyByteBuffer buffer) {
 	
 	}
 }
