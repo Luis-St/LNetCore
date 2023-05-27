@@ -7,7 +7,6 @@ import net.luis.netcore.packet.impl.internal.SyncServerDataPacket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 

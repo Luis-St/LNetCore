@@ -7,7 +7,7 @@ import net.luis.netcore.connection.event.impl.*;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.filter.PacketFilter;
+import net.luis.netcore.packet.impl.internal.InternalPacket;
 import net.luis.netcore.packet.listener.*;
 import net.luis.utils.collection.Registry;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +34,6 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
 	private final Registry<ConnectionListener> listeners = Registry.of();
-	private final Registry<PacketFilter> filters = Registry.of();
 	private final ConnectionInitializer initializer;
 	protected final Channel channel;
 	protected final Optional<Packet> handshake;
@@ -99,13 +98,14 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
+		if (packet instanceof InternalPacket || packet.getTarget().isInternal()) {
+			throw new IllegalStateException("Internal packets must not be received using this connection");
 		try {
 			LOGGER.debug("Received {}", packet);
 			if (!packet.isInternal() && this.filters.getItems().stream().anyMatch(filter -> filter.filter(packet))) {
 				LOGGER.debug("{} with target '{}' was filtered", packet.getClass().getSimpleName(), packet.getTarget().getName());
 			} else {
 				this.callListeners(packet);
-			}
 		} catch (Exception e) {
 			LOGGER.warn("Fail to handle {}", packet, e);
 		}
@@ -164,7 +164,6 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	}
 	//endregion
 	
-	//region Filter registration
 	public @NotNull UUID registerFilter(PacketFilter filter) {
 		return this.filters.register(Objects.requireNonNull(filter, "Filter must not be null"));
 	}
