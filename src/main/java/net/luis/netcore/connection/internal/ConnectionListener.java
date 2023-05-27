@@ -1,5 +1,6 @@
-package net.luis.netcore.connection;
+package net.luis.netcore.connection.internal;
 
+import net.luis.netcore.connection.ConnectionContext;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketPriority;
 import net.luis.netcore.packet.listener.PacketTarget;
@@ -16,7 +17,7 @@ import java.util.function.BiConsumer;
  */
 
 @ApiStatus.Internal
-record ConnectionListener(UUID uniqueId, Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, ConnectionContext> listener) {
+public record ConnectionListener(UUID uniqueId, Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, ConnectionContext> listener) {
 	
 	public ConnectionListener {
 		Objects.requireNonNull(uniqueId, "Unique id must not be null");

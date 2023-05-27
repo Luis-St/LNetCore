@@ -1,6 +1,7 @@
 package net.luis.netcore.connection;
 
 import com.google.common.collect.Lists;
+import net.luis.netcore.connection.internal.ConnectionListener;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.*;
 import net.luis.utils.collection.Registry;
@@ -82,7 +83,8 @@ public class ConnectionRegistry {
 		return this.listeners.remove(uniqueId);
 	}
 	
-	public @NotNull List<ConnectionListener> getListeners() {
+	@ApiStatus.Internal
+	@NotNull List<ConnectionListener> getListeners() {
 		List<ConnectionListener> listeners = Lists.newArrayList(this.listeners.getItems());
 		listeners.sort(Comparator.comparing(ConnectionListener::priority).reversed());
 		return listeners;

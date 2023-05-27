@@ -2,7 +2,7 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.ClientConnection;
+import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.util.ConnectionInitializer;

@@ -4,6 +4,8 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.netcore.packet.util.PacketWrapper;
+import net.luis.netcore.packet.util.Skippable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

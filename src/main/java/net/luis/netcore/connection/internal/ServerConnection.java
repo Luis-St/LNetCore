@@ -1,7 +1,8 @@
-package net.luis.netcore.connection;
+package net.luis.netcore.connection.internal;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.packet.impl.internal.SyncServerDataPacket;
 import org.apache.logging.log4j.LogManager;

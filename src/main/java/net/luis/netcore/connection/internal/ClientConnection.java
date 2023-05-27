@@ -1,7 +1,8 @@
-package net.luis.netcore.connection;
+package net.luis.netcore.connection.internal;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.event.impl.HandshakeEvent;
 import net.luis.netcore.connection.event.impl.OpenEvent;
 import net.luis.netcore.connection.util.ConnectionInitializer;

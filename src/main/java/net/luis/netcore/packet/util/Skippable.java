@@ -1,4 +1,4 @@
-package net.luis.netcore.packet;
+package net.luis.netcore.packet.util;
 
 import java.lang.annotation.*;
 

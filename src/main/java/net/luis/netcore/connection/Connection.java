@@ -1,22 +1,20 @@
 package net.luis.netcore.connection;
 
-import com.google.common.collect.Lists;
 import io.netty.channel.*;
 import io.netty.handler.timeout.TimeoutException;
 import net.luis.netcore.connection.event.impl.*;
+import net.luis.netcore.connection.internal.*;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.InternalPacket;
-import net.luis.netcore.packet.listener.*;
-import net.luis.utils.collection.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import static io.netty.channel.ChannelFutureListener.*;
 import static net.luis.netcore.connection.event.ConnectionEventManager.*;
@@ -56,7 +54,8 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		return Objects.requireNonNull(this.uniqueId, "Unique id has not been initialized yet");
 	}
 	
-	void setUniqueId(UUID uniqueId) {
+	@ApiStatus.Internal
+	public void setUniqueId(UUID uniqueId) {
 		if (this.uniqueId != null) {
 			throw new IllegalStateException("Unique id is already set");
 		}
