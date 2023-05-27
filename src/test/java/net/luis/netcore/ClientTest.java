@@ -5,7 +5,6 @@ import net.luis.netcore.connection.ConnectionContext;
 import net.luis.netcore.instance.ClientInstance;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.internal.CloseServerPacket;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
 import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.PacketListener;

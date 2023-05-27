@@ -2,7 +2,6 @@ package net.luis.netcore.connection;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.event.impl.HandshakeEvent;
 import net.luis.netcore.connection.event.impl.OpenEvent;
 import net.luis.netcore.connection.util.ConnectionInitializer;
