@@ -2,18 +2,18 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.ClientConnection;
-import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.*;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
-import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.event.Event;
+import net.luis.utils.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -30,15 +30,16 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.)<br>
+	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.) -> @RequirePermission<br>
 	 *  - avoid exposing the connection to the initializer<br>
-	 *  - try to add second internal handler (connection) for internal stuff only -> avoid exposing internal packets
-	 *  - ClientInstance#direct -> should open a connection sending only one packet waits for response and closes the connection -> returns the response
+	 *  - ClientInstance#direct -> should open a connection sending only one packet waits for response and closes the connection -> returns the response<br>
+	 *  - add way to disable events in connection -> e.g. ConnectionSettings<br>
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
 	
 	private final ConnectionInitializer initializer;
+	private InternalConnection internalConnection;
 	private Connection connection;
 	private Packet handshake;
 	
@@ -61,9 +62,9 @@ public class ClientInstance extends AbstractNetworkInstance {
 			LOGGER.debug("Starting client");
 			new Bootstrap().group(this.buildGroup("client connection")).channel(NioSocketChannel.class).handler(new SimpleChannelInitializer(channel -> {
 				this.connection = new ClientConnection(channel, this.initializer, Optional.ofNullable(this.handshake));
-				this.connection.registerListener(new InternalListener(this));
+				this.internalConnection = new InternalConnection(this, this.connection, channel);
 				this.initialized = true;
-				return this.connection;
+				return Pair.of(this.internalConnection, this.connection);
 			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();
 			LOGGER.info("Client successfully started on {}:{}", this.getHost(), this.getPort());
 		} catch (Exception e) {
@@ -78,16 +79,19 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	@Override
 	public void closeNow() {
-		if (this.connection == null) {
+		if (this.connection == null || this.internalConnection == null) {
 			LOGGER.warn("Client has already been closed");
 			return;
 		}
-		this.connection.send(new CloseConnectionPacket().withTarget(PacketTarget.INTERNAL));
+		this.internalConnection.send(new CloseConnectionPacket());
 		this.closeInternal();
 	}
 	
-	private void closeInternal() {
+	@ApiStatus.Internal
+	void closeInternal() {
 		LOGGER.debug("Closing client");
+		this.internalConnection.close();
+		this.internalConnection = null;
 		this.connection.close();
 		this.connection = null;
 		super.closeNow();
@@ -121,20 +125,6 @@ public class ClientInstance extends AbstractNetworkInstance {
 	@Override
 	public String toString() {
 		return "ClientInstance";
-	}
-	//endregion
-	
-	//region Internal listener
-	private static record InternalListener(ClientInstance instance) implements PacketListener {
-		
-		@Override
-		public void initialize(Connection connection) {
-			connection.builder().listener(CloseConnectionPacket.class, (packet) -> this.closeConnection()).register();
-		}
-		
-		private void closeConnection() {
-			this.instance.closeInternal();
-		}
 	}
 	//endregion
 }

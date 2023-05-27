@@ -2,6 +2,8 @@ package net.luis.netcore.connection.util;
 
 import io.netty.channel.Channel;
 import net.luis.netcore.connection.Connection;
+import net.luis.netcore.instance.InternalConnection;
+import net.luis.utils.util.Pair;
 
 /**
  *
@@ -12,5 +14,5 @@ import net.luis.netcore.connection.Connection;
 @FunctionalInterface
 public interface ConnectionFactory {
 	
-	Connection create(Channel channel);
+	Pair<InternalConnection, Connection> create(Channel channel);
 }

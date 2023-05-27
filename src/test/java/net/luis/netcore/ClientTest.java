@@ -3,9 +3,11 @@ package net.luis.netcore;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.ConnectionContext;
 import net.luis.netcore.instance.ClientInstance;
+import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseServerPacket;
 import net.luis.netcore.packet.impl.value.IntegerPacket;
+import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.logging.LoggingUtils;
@@ -28,7 +30,7 @@ public class ClientTest {
 		ClientInstance client = new ClientInstance(ClientTest::initializeConnection);
 		client.handshake(new IntegerPacket(10));
 		client.open("localhost", 8080);
-		//client.closeOn(ClosingEvent.closeAfterReceived(StringPacket.class));
+		client.closeOn(ClosingEvent.closeAfterReceived(StringPacket.class));
 	}
 	
 	private static void initializeConnection(@NotNull Connection connection) {
@@ -46,7 +48,9 @@ public class ClientTest {
 		}
 		
 		public void doubleListener(Packet packet, ConnectionContext ctx) {
-			ctx.sendPacket(new CloseServerPacket());
+			if (packet instanceof StringPacket strPacket) {
+				LOGGER.info("Message from server: {}", strPacket.get());
+			}
 		}
 	}
 }

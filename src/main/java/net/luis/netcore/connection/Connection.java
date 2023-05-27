@@ -64,6 +64,10 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		this.initializer.initialize(this);
 	}
 	
+	public boolean isInitialized() {
+		return this.uniqueId != null;
+	}
+	
 	public boolean isOpen() {
 		return this.channel.isOpen();
 	}
@@ -71,6 +75,8 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	//region Sending packets
 	public void send(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
+		if (packet instanceof InternalPacket || packet.getTarget().isInternal()) {
+			throw new IllegalArgumentException("Internal packets must not be sent using this connection");
 		}
 		SendEvent event = new SendEvent(this.uniqueId, packet);
 		INSTANCE.dispatch(SEND, event);
@@ -90,12 +96,10 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		Objects.requireNonNull(packet, "Packet must not be null");
 		if (packet instanceof InternalPacket || packet.getTarget().isInternal()) {
 			throw new IllegalStateException("Internal packets must not be received using this connection");
+		}
 		try {
 			LOGGER.debug("Received {}", packet);
-			if (!packet.isInternal() && this.filters.getItems().stream().anyMatch(filter -> filter.filter(packet))) {
-				LOGGER.debug("{} with target '{}' was filtered", packet.getClass().getSimpleName(), packet.getTarget().getName());
-			} else {
-				this.callListeners(packet);
+			this.callListeners(packet);
 		} catch (Exception e) {
 			LOGGER.warn("Fail to handle {}", packet, e);
 		}
