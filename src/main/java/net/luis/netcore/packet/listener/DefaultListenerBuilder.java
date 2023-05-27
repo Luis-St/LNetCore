@@ -1,6 +1,7 @@
 package net.luis.netcore.packet.listener;
 
 import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionRegistry;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,18 +19,18 @@ public class DefaultListenerBuilder extends ListenerBuilder {
 	private final PacketPriority defaultPriority;
 	
 	@ApiStatus.Internal
-	public DefaultListenerBuilder(Connection connection, PacketTarget defaultTarget) {
-		this(connection, defaultTarget, PacketPriority.NORMAL);
+	public DefaultListenerBuilder(ConnectionRegistry registry, PacketTarget defaultTarget) {
+		this(registry, defaultTarget, PacketPriority.NORMAL);
 	}
 	
 	@ApiStatus.Internal
-	public DefaultListenerBuilder(Connection connection, PacketPriority defaultPriority) {
-		this(connection, PacketTarget.ANY, defaultPriority);
+	public DefaultListenerBuilder(ConnectionRegistry registry, PacketPriority defaultPriority) {
+		this(registry, PacketTarget.ANY, defaultPriority);
 	}
 	
 	@ApiStatus.Internal
-	public DefaultListenerBuilder(Connection connection, PacketTarget defaultTarget, PacketPriority defaultPriority) {
-		super(connection);
+	public DefaultListenerBuilder(ConnectionRegistry registry, PacketTarget defaultTarget, PacketPriority defaultPriority) {
+		super(registry);
 		this.defaultTarget = defaultTarget;
 		this.defaultPriority = defaultPriority;
 		this.resetDefaults();

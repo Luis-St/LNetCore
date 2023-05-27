@@ -1,7 +1,6 @@
 package net.luis.netcore.packet.listener;
 
-import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionContext;
+import net.luis.netcore.connection.*;
 import net.luis.netcore.packet.Packet;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -19,15 +18,15 @@ import java.util.function.Consumer;
 
 public class ListenerBuilder {
 	
-	private final Connection connection;
+	private final ConnectionRegistry registry;
 	private Class<? extends Packet> packetClass = Packet.class;
 	private BiConsumer<Packet, ConnectionContext> consumer;
 	protected PacketTarget target = PacketTarget.ANY;
 	protected PacketPriority priority = PacketPriority.NORMAL;
 	
 	@ApiStatus.Internal
-	public ListenerBuilder(Connection connection) {
-		this.connection = Objects.requireNonNull(connection, "Connection must not be null");
+	public ListenerBuilder(ConnectionRegistry registry) {
+		this.registry = Objects.requireNonNull(registry, "Connection registry must not be null");
 	}
 	
 	public @NotNull ListenerBuilder target(PacketTarget target) {
@@ -80,6 +79,6 @@ public class ListenerBuilder {
 	
 	@SuppressWarnings("unchecked")
 	public @NotNull UUID register() {
-		return this.connection.registerListener((Class<Packet>) this.packetClass, this.target, this.priority, this.consumer);
+		return this.registry.registerListener((Class<Packet>) this.packetClass, this.target, this.priority, this.consumer);
 	}
 }

@@ -49,7 +49,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 				this.internalConnections.put(internalConnection.getUniqueId(), internalConnection);
 				this.connections.put(connection.getUniqueId(), connection);
 				LOGGER.info("Client connected with address {} using connection {}", channel.remoteAddress().toString().replace("/", ""), connection.getUniqueId());
-				LOGGER.debug("Internal connection {} created", internalConnection.getUniqueId());
+				LOGGER.debug("Created internal connection {}", internalConnection.getUniqueId());
 				return Pair.of(internalConnection, connection);
 			})).localAddress(this.getHost(), this.getPort()).bind().syncUninterruptibly().channel();
 			LOGGER.info("Server successfully started on {}:{}", this.getHost(), this.getPort());
@@ -84,7 +84,6 @@ public class ServerInstance extends AbstractNetworkInstance {
 	
 	void closeConnectionInternal(UUID uniqueId) {
 		Objects.requireNonNull(uniqueId, "Unique id must not be null");
-		LOGGER.debug("Try closing connection {}", uniqueId);
 		this.internalConnections.remove(uniqueId).close();
 		this.connections.remove(uniqueId).close();
 	}

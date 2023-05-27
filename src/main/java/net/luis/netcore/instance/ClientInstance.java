@@ -64,6 +64,7 @@ public class ClientInstance extends AbstractNetworkInstance {
 				this.connection = new ClientConnection(channel, this.initializer, Optional.ofNullable(this.handshake));
 				this.internalConnection = new InternalConnection(this, this.connection, channel);
 				this.initialized = true;
+				LOGGER.debug("Created internal connection {}", this.internalConnection.getUniqueId());
 				return Pair.of(this.internalConnection, this.connection);
 			})).connect(this.getHost(), this.getPort()).syncUninterruptibly().channel();
 			LOGGER.info("Client successfully started on {}:{}", this.getHost(), this.getPort());

@@ -1,6 +1,7 @@
 package net.luis.netcore;
 
 import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionRegistry;
 import net.luis.netcore.instance.ServerInstance;
 import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.utils.logging.LoggingUtils;
@@ -24,8 +25,8 @@ public class ServerTest {
 		server.open("localhost", 8080);
 	}
 	
-	private static void initializeConnection(@NotNull Connection connection) {
-		connection.builder().listener((packet, ctx) -> ctx.sendPacket(new StringPacket("You sent " + packet).withTarget(4))).register();
-		LOGGER.info("Initialized server connection {}", connection.getUniqueId());
+	private static void initializeConnection(@NotNull ConnectionRegistry registry) {
+		registry.builder().listener((packet, ctx) -> ctx.sendPacket(new StringPacket("You sent " + packet).withTarget(4))).register();
+		LOGGER.info("Initialized server connection {}", registry.getUniqueId());
 	}
 }

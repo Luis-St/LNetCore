@@ -1,6 +1,6 @@
 package net.luis.netcore.connection.util;
 
-import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionRegistry;
 
 /**
  *
@@ -11,5 +11,5 @@ import net.luis.netcore.connection.Connection;
 @FunctionalInterface
 public interface ConnectionInitializer {
 	
-	void initialize(Connection connection);
+	void initialize(ConnectionRegistry registry);
 }

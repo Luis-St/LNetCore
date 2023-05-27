@@ -59,7 +59,7 @@ public final class InternalConnection extends SimpleChannelInboundHandler<Packet
 			if (packet.getTarget().isInternal()) {
 				throw new IllegalStateException("Received packet with target 'internal' but packet is not internal");
 			}
-			LOGGER.debug("Skipping non-internal packet {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
+			LOGGER.debug("Skipping non-internal {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 			ctx.fireChannelRead(packet);
 			return;
 		}

@@ -3,6 +3,7 @@ package net.luis.netcore.connection;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.listener.PacketPriority;
 import net.luis.netcore.packet.listener.PacketTarget;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import java.util.function.BiConsumer;
  *
  */
 
+@ApiStatus.Internal
 record ConnectionListener(UUID uniqueId, Class<? extends Packet> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<Packet, ConnectionContext> listener) {
 	
 	public ConnectionListener {

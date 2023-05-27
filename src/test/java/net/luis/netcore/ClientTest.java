@@ -1,7 +1,6 @@
 package net.luis.netcore;
 
-import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.ConnectionContext;
+import net.luis.netcore.connection.*;
 import net.luis.netcore.instance.ClientInstance;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
@@ -32,9 +31,9 @@ public class ClientTest {
 		client.closeOn(ClosingEvent.closeAfterReceived(StringPacket.class));
 	}
 	
-	private static void initializeConnection(@NotNull Connection connection) {
-		connection.registerListener(new Listener());
-		LOGGER.info("Initialized client connection {}", connection.getUniqueId());
+	private static void initializeConnection(@NotNull ConnectionRegistry registry) {
+		registry.registerListener(new Listener());
+		LOGGER.info("Initialized client connection {}", registry.getUniqueId());
 	}
 	
 	public static class Listener implements PacketListener {
@@ -42,8 +41,8 @@ public class ClientTest {
 		private static final Logger LOGGER = LogManager.getLogger(ClientTest.Listener.class);
 		
 		@Override
-		public void initialize(Connection connection) {
-			connection.builder().target(PacketTarget.of(4)).listener(this::doubleListener).register();
+		public void initialize(ConnectionRegistry registry) {
+			registry.builder().target(PacketTarget.of(4)).listener(this::doubleListener).register();
 		}
 		
 		public void doubleListener(Packet packet, ConnectionContext ctx) {

@@ -33,7 +33,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
-	private final Registry<ConnectionListener> listeners = Registry.of();
+	private final ConnectionRegistry registry = new ConnectionRegistry(() -> this.uniqueId);
 	private final ConnectionInitializer initializer;
 	protected final Channel channel;
 	protected final Optional<Packet> handshake;
@@ -61,7 +61,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 			throw new IllegalStateException("Unique id is already set");
 		}
 		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
-		this.initializer.initialize(this);
+		this.initializer.initialize(this.registry);
 	}
 	
 	public boolean isInitialized() {
@@ -128,42 +128,13 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	//endregion
 	
 	//region Listener registration
-	public @NotNull ListenerBuilder builder() {
-		return new ListenerBuilder(this);
-	}
-	
-	public @NotNull ListenerBuilder builder(PacketTarget target) {
-		return new DefaultListenerBuilder(this, target);
-	}
-	
-	public @NotNull ListenerBuilder builder(PacketPriority priority) {
-		return new DefaultListenerBuilder(this, priority);
-	}
-	
-	public @NotNull ListenerBuilder builder(PacketTarget target, PacketPriority priority) {
-		return new DefaultListenerBuilder(this, target, priority);
-	}
-	
-	public void registerListener(PacketListener listener) {
-		Objects.requireNonNull(listener, "Listener must not be null").initialize(this);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <T extends Packet> @NotNull UUID registerListener(Class<T> packetClass, PacketTarget target, PacketPriority priority, BiConsumer<T, ConnectionContext> listener) {
-		return this.listeners.register(uniqueId -> new ConnectionListener(uniqueId, packetClass, target, priority, (BiConsumer<Packet, ConnectionContext>) listener));
-	}
-	
-	public boolean removeListener(UUID uniqueId) {
-		return this.listeners.remove(uniqueId);
-	}
+
 	//endregion
 	
 	private void callListeners(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		boolean handled = false;
-		List<ConnectionListener> listeners = Lists.newArrayList(this.listeners.getItems());
-		listeners.sort(Comparator.comparing(ConnectionListener::priority).reversed());
-		for (ConnectionListener listener : listeners) {
+		for (ConnectionListener listener : this.registry.getListeners()) {
 			if (listener.shouldCall(packet)) {
 				try {
 					listener.call(packet, new ConnectionContext(this.uniqueId, this::send));
@@ -181,7 +152,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	}
 	
 	public void close() {
-		this.listeners.clear();
+		this.registry.close();
 		this.channel.close();
 	}
 	
