@@ -1,6 +1,7 @@
 package net.luis.netcore.connection.util;
 
 import net.luis.netcore.connection.ConnectionRegistry;
+import net.luis.netcore.connection.ConnectionSettings;
 
 /**
  *

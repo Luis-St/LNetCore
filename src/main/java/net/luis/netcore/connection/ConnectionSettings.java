@@ -18,6 +18,7 @@ public class ConnectionSettings {
 	
 	private final Supplier<UUID> uniqueId;
 	private boolean allowEvents = true;
+	private PermissionHandler<?> permissionHandler;
 	
 	@ApiStatus.Internal
 	ConnectionSettings(Supplier<UUID> uniqueId) {
@@ -34,5 +35,13 @@ public class ConnectionSettings {
 	
 	public void setEventsAllowed(boolean allowEvents) {
 		this.allowEvents = allowEvents;
+	}
+	
+	public PermissionHandler<?> getPermissionHandler() {
+		return this.permissionHandler;
+	}
+	
+	public void setPermissionHandler(PermissionHandler<?> permissionHandler) {
+		this.permissionHandler = permissionHandler;
 	}
 }

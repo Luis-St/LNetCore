@@ -82,10 +82,13 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	}
 	
 	//region Sending packets
-	public void send(Packet packet) {
+	public <T> void send(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		if (packet instanceof InternalPacket || packet.getTarget().isInternal()) {
 			throw new IllegalArgumentException("Internal packets must not be sent using this connection");
+		}
+		if (!this.hasPermission(packet)) {
+			return;
 		}
 		if (this.settings.areEventsAllowed()) {
 			SendEvent event = new SendEvent(this.uniqueId, packet);
@@ -96,6 +99,23 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		} else {
 			this.sendInternal(packet);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T> boolean hasPermission(Packet packet) {
+		Objects.requireNonNull(packet, "Packet must not be null");
+		if (packet.requiresPermission()) {
+			PermissionHandler<T> handler = (PermissionHandler<T>) this.settings.getPermissionHandler();
+			if (handler == null) {
+				throw new IllegalStateException(packet + " requires permission but no permission handler is set");
+			}
+			return handler.hasPermission(handler.mapUser(this.uniqueId), packet);
+		}
+		return true;
+	}
+	
+	private void sendInternal(Packet packet) {
+		if (this.channel.isOpen()) {
 			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
 			LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 		}

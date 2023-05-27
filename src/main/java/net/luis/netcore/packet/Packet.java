@@ -4,6 +4,7 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.netcore.packet.permission.RequiresPermission;
 import net.luis.netcore.packet.util.PacketWrapper;
 import net.luis.netcore.packet.util.Skippable;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,10 @@ public abstract class Packet implements Encodable, Decodable {
 	
 	public final boolean isSkippable() {
 		return this.getClass().isAnnotationPresent(Skippable.class);
+	}
+	
+	public final boolean requiresPermission() {
+		return this.getClass().isAnnotationPresent(RequiresPermission.class);
 	}
 	
 	public <T> T getWrapped(PacketWrapper<T> wrapper) {
