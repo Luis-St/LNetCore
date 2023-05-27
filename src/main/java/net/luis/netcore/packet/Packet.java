@@ -48,10 +48,6 @@ public abstract class Packet implements Encodable, Decodable {
 		return this.getClass().isAnnotationPresent(Skippable.class);
 	}
 	
-	public boolean bypassEvent(EventType<?> type) {
-		return this.isInternal();
-	}
-	
 	public <T> T getWrapped(PacketWrapper<T> wrapper) {
 		return Objects.requireNonNull(wrapper, "Wrapper must not be null").wrap(this);
 	}

@@ -71,23 +71,13 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	//region Sending packets
 	public void send(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
-		if (packet.bypassEvent(SEND)) {
-			this.sendInternal(packet);
-			if (!packet.isInternal()) {
-				LOGGER.debug("Non-internal {} bypassed event '{}'", packet.getClass().getSimpleName(), SEND.name());
-			}
-			return;
 		}
 		SendEvent event = new SendEvent(this.uniqueId, packet);
 		INSTANCE.dispatch(SEND, event);
-		if (!event.isCancelled()) {
-			this.sendInternal(event.getPacket());
+		if (!event.isCancelled() && this.channel.isOpen()) {
+			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
+			LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 		}
-	}
-	
-	private void sendInternal(Packet packet) {
-		this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
-		LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 	}
 	//endregion
 	
@@ -164,15 +154,6 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	}
 	//endregion
 	
-	public @NotNull UUID registerFilter(PacketFilter filter) {
-		return this.filters.register(Objects.requireNonNull(filter, "Filter must not be null"));
-	}
-	
-	public boolean removeFilter(UUID uniqueId) {
-		return this.filters.remove(uniqueId);
-	}
-	//endregion
-	
 	private void callListeners(Packet packet) {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		boolean handled = false;
@@ -188,14 +169,10 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 				}
 			}
 		}
-		if (!packet.bypassEvent(RECEIVE)) {
-			ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
-			INSTANCE.dispatch(RECEIVE, event);
-			if (!event.isHandled()) {
-				LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
-			}
-		} else if (!packet.isInternal()) {
-			LOGGER.debug("Non-internal {} bypassed event '{}'", packet.getClass().getSimpleName(), RECEIVE.name());
+		ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
+		INSTANCE.dispatch(RECEIVE, event);
+		if (!event.isHandled()) {
+			LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
 		}
 	}
 	
