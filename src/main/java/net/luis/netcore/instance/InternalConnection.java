@@ -44,6 +44,7 @@ public final class InternalConnection extends SimpleChannelInboundHandler<Packet
 		return null;
 	}
 	
+	//region Sending packets
 	public void send(InternalPacket packet) {
 		if (this.channel.isOpen()) {
 			Objects.requireNonNull(packet, "Packet must not be null");
@@ -51,7 +52,9 @@ public final class InternalConnection extends SimpleChannelInboundHandler<Packet
 			LOGGER.debug("Sent internal {}", packet.getClass().getSimpleName());
 		}
 	}
+	//endregion
 	
+	//region Netty overrides
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
 		Objects.requireNonNull(packet, "Packet must not be null");
@@ -100,6 +103,7 @@ public final class InternalConnection extends SimpleChannelInboundHandler<Packet
 			LOGGER.error("Caught exception while channel is closed", cause);
 		}
 	}
+	//endregion
 	
 	public void close() {
 		this.channel.close();

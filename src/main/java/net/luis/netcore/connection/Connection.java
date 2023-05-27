@@ -8,6 +8,7 @@ import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.InternalPacket;
+import net.luis.netcore.packet.permission.PermissionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -32,6 +33,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	
 	private final ConnectionRegistry registry = new ConnectionRegistry(() -> this.uniqueId);
+	private final ConnectionSettings settings = new ConnectionSettings(() -> this.uniqueId);
 	private final ConnectionInitializer initializer;
 	protected final Channel channel;
 	protected final Optional<Packet> handshake;
@@ -50,6 +52,14 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		this.setUniqueId(uniqueId);
 	}
 	
+	public @NotNull ConnectionRegistry getRegistry() {
+		return this.registry;
+	}
+	
+	public @NotNull ConnectionSettings getSettings() {
+		return this.settings;
+	}
+	
 	public @NotNull UUID getUniqueId() {
 		return Objects.requireNonNull(this.uniqueId, "Unique id has not been initialized yet");
 	}
@@ -60,7 +70,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 			throw new IllegalStateException("Unique id is already set");
 		}
 		this.uniqueId = Objects.requireNonNull(uniqueId, "Unique id must not be null");
-		this.initializer.initialize(this.registry);
+		this.initializer.initialize(this.registry, this.settings);
 	}
 	
 	public boolean isInitialized() {
@@ -77,9 +87,15 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 		if (packet instanceof InternalPacket || packet.getTarget().isInternal()) {
 			throw new IllegalArgumentException("Internal packets must not be sent using this connection");
 		}
-		SendEvent event = new SendEvent(this.uniqueId, packet);
-		INSTANCE.dispatch(SEND, event);
-		if (!event.isCancelled() && this.channel.isOpen()) {
+		if (this.settings.areEventsAllowed()) {
+			SendEvent event = new SendEvent(this.uniqueId, packet);
+			INSTANCE.dispatch(SEND, event);
+			if (!event.isCancelled()) {
+				this.sendInternal(packet);
+			}
+		} else {
+			this.sendInternal(packet);
+		}
 			this.channel.writeAndFlush(packet).addListener(CLOSE_ON_FAILURE);
 			LOGGER.debug("Sent {} with target '{}'", packet.getClass().getSimpleName(), packet.getTarget().getName());
 		}
@@ -121,8 +137,10 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	}
 	
 	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		INSTANCE.dispatch(CLOSE, new CloseEvent(this.uniqueId));
+	public void channelInactive(ChannelHandlerContext ctx) {
+		if (this.settings.areEventsAllowed()) {
+			INSTANCE.dispatch(CLOSE, new CloseEvent(this.uniqueId));
+		}
 	}
 	//endregion
 	
@@ -143,10 +161,14 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 				}
 			}
 		}
-		ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
-		INSTANCE.dispatch(RECEIVE, event);
-		if (!event.isHandled()) {
-			LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
+		if (this.settings.areEventsAllowed()) {
+			ReceiveEvent event = new ReceiveEvent(this.uniqueId, packet, handled);
+			INSTANCE.dispatch(RECEIVE, event);
+			if (!event.isHandled()) {
+				LOGGER.warn("{} with target '{}' was not handled by any listener or event", packet, packet.getTarget().getName());
+			}
+		} else if (!handled) {
+			LOGGER.warn("{} with target '{}' was not handled by any listener", packet, packet.getTarget().getName());
 		}
 	}
 	

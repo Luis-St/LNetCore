@@ -11,5 +11,5 @@ import net.luis.netcore.connection.ConnectionRegistry;
 @FunctionalInterface
 public interface ConnectionInitializer {
 	
-	void initialize(ConnectionRegistry registry);
+	void initialize(ConnectionRegistry registry, ConnectionSettings settings);
 }

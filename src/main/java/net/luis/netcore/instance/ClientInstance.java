@@ -2,9 +2,9 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
@@ -30,10 +30,8 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - add permissions for special packets (CloseServerPacket, CloseConnectionPacket, etc.) -> @RequirePermission<br>
-	 *  - avoid exposing the connection to the initializer<br>
 	 *  - ClientInstance#direct -> should open a connection sending only one packet waits for response and closes the connection -> returns the response<br>
-	 *  - add way to disable events in connection -> e.g. ConnectionSettings<br>
+	 *  - request internal packet -> as send message packet (#requestCloseServer (Client), #requestCloseConnection (Server)) -> using Permissions<br>
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
@@ -43,8 +41,9 @@ public class ClientInstance extends AbstractNetworkInstance {
 	private Connection connection;
 	private Packet handshake;
 	
+	@Deprecated
 	public ClientInstance() {
-		this((connection) -> {});
+		this((connection, settings) -> {});
 	}
 	
 	public ClientInstance(ConnectionInitializer initializer) {

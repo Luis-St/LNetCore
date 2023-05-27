@@ -31,7 +31,7 @@ public class ClientTest {
 		client.closeOn(ClosingEvent.closeAfterReceived(StringPacket.class));
 	}
 	
-	private static void initializeConnection(@NotNull ConnectionRegistry registry) {
+	private static void initializeConnection(@NotNull ConnectionRegistry registry, @NotNull ConnectionSettings settings) {
 		registry.registerListener(new Listener());
 		LOGGER.info("Initialized client connection {}", registry.getUniqueId());
 	}

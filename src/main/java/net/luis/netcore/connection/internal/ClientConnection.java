@@ -40,6 +40,18 @@ public final class ClientConnection extends Connection {
 		Objects.requireNonNull(packet, "Packet must not be null");
 		LOGGER.debug("Received server data");
 		this.setUniqueId(packet.getUniqueId());
+		if (this.getSettings().areEventsAllowed()) {
+			this.initializeUsingEvents();
+		} else {
+			this.handshake.ifPresent(handshake -> {
+				this.channel.writeAndFlush(handshake.withTarget(PacketTarget.HANDSHAKE)).addListener(CLOSE_ON_FAILURE);
+				LOGGER.debug("Sent handshake {}", handshake.getClass().getSimpleName());
+			});
+		}
+		
+	}
+	
+	private void initializeUsingEvents() {
 		INSTANCE.dispatch(OPEN, new OpenEvent(this.getUniqueId()));
 		this.handshake.ifPresent(handshake -> {
 			HandshakeEvent event = new HandshakeEvent(this.getUniqueId(), handshake);
