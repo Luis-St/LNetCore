@@ -30,11 +30,6 @@ import static net.luis.netcore.connection.event.ConnectionEventManager.*;
 
 public class ClientInstance extends AbstractNetworkInstance {
 	
-	/**
-	 * TODO:<br>
-	 *  - exclude internal packets from module-info (packet.impl.internal and connection.internal)<br>
-	 */
-	
 	private static final Logger LOGGER = LogManager.getLogger(ClientInstance.class);
 	
 	private final ConnectionInitializer initializer;
