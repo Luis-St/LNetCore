@@ -4,14 +4,15 @@ import com.google.common.collect.Maps;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.luis.netcore.connection.Connection;
-import net.luis.netcore.connection.internal.ServerConnection;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
+import net.luis.netcore.connection.internal.ServerConnection;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
 import net.luis.utils.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 
@@ -30,7 +31,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 	private final ConnectionInitializer initializer;
 	
 	public ServerInstance() {
-		this((connection) -> {});
+		this((registry, settings) -> {});
 	}
 	
 	public ServerInstance(ConnectionInitializer initializer) {
@@ -82,6 +83,7 @@ public class ServerInstance extends AbstractNetworkInstance {
 		this.closeConnectionInternal(uniqueId);
 	}
 	
+	@ApiStatus.Internal
 	void closeConnectionInternal(UUID uniqueId) {
 		Objects.requireNonNull(uniqueId, "Unique id must not be null");
 		this.internalConnections.remove(uniqueId).close();

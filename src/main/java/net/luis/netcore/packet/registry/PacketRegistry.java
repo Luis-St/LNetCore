@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.exception.InvalidPacketException;
 import net.luis.netcore.packet.Packet;
-import net.luis.netcore.packet.impl.action.ActionPacket;
+import net.luis.netcore.packet.impl.action.*;
 import net.luis.netcore.packet.impl.data.*;
 import net.luis.netcore.packet.impl.internal.*;
 import net.luis.netcore.packet.impl.message.ErrorPacket;
@@ -88,14 +88,14 @@ public class PacketRegistry {
 			return;
 		}
 		if (!ReflectionHelper.hasConstructor(clazz, FriendlyByteBuffer.class)) {
-			LOGGER.error("Cannot register packet {} because it does not have a constructor with FriendlyByteBuffer as parameter", clazz.getSimpleName());
+			LOGGER.error("Cannot register {} because it does not have a constructor with FriendlyByteBuffer as parameter", clazz.getSimpleName());
 			return;
 		}
 		if (!clazz.getSimpleName().endsWith("Packet")) {
-			LOGGER.warn("A packet should end with 'Packet' but {} does not", clazz.getSimpleName());
+			LOGGER.warn("A packet implementation should end with 'Packet' but {} does not", clazz.getSimpleName());
 		}
 		if (PACKETS.containsKey(index)) {
-			throw new IllegalStateException("Cannot register packet " + clazz.getSimpleName() + " because the id " + index + " is already registered to packet " + PACKETS.get(index).getSimpleName());
+			throw new IllegalStateException("Cannot register " + clazz.getSimpleName() + " because the id " + index + " is already registered to " + PACKETS.get(index).getSimpleName());
 		} else {
 			PACKETS.put(index++, clazz);
 		}
@@ -103,6 +103,8 @@ public class PacketRegistry {
 	
 	static {
 		register(ActionPacket.class);
+		register(RequestPacket.class);
+		register(ResponsePacket.class);
 		register(DataPacket.class);
 		register(ListPacket.class);
 		register(MapPacket.class);
