@@ -2,11 +2,13 @@ package net.luis.netcore.instance;
 
 import io.netty.channel.*;
 import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.ConnectionSettings;
 import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.*;
 import net.luis.netcore.packet.listener.PacketTarget;
+import net.luis.netcore.packet.permission.PermissionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -84,12 +86,18 @@ public final class InternalConnection extends SimpleChannelInboundHandler<Packet
 		}
 	}
 	
-	private void handleServer(ServerInstance instance, InternalPacket packet) {
+	@SuppressWarnings("unchecked")
+	private <T> void handleServer(ServerInstance instance, InternalPacket packet) {
 		if (packet instanceof CloseConnectionPacket) {
 			instance.closeConnectionInternal(this.getUniqueId());
 			LOGGER.info("Client disconnected with address {} using connection {}", this.channel.remoteAddress().toString().replace("/", ""), this.getUniqueId());
 		} else if (packet instanceof CloseServerPacket) {
-			instance.closeNow();
+			PermissionHandler<T> handler = (PermissionHandler<T>) this.connection.getSettings().getPermissionHandler();
+			if (handler != null && handler.canCloseServer(handler.mapUser(this.getUniqueId()))) {
+				instance.closeNow();
+			} else {
+				LOGGER.warn("Client {} tried to close server but has no permission", this.getUniqueId());
+			}
 		}
 	}
 	

@@ -15,4 +15,8 @@ public interface PermissionHandler<T> {
 	T mapUser(UUID uniqueId);
 	
 	boolean hasPermission(T user, Packet packet);
+	
+	default boolean canCloseServer(T user) {
+		return false;
+	}
 }

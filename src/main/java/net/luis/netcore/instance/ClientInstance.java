@@ -9,6 +9,7 @@ import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
+import net.luis.netcore.packet.impl.internal.CloseServerPacket;
 import net.luis.utils.event.Event;
 import net.luis.utils.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -31,7 +32,6 @@ public class ClientInstance extends AbstractNetworkInstance {
 	
 	/**
 	 * TODO:<br>
-	 *  - request internal packet -> as send message packet (#requestCloseServer (Client), #requestCloseConnection (Server)) -> using Permissions<br>
 	 *  - exclude internal packets from module-info (packet.impl.internal and connection.internal)<br>
 	 */
 	
@@ -86,6 +86,10 @@ public class ClientInstance extends AbstractNetworkInstance {
 	@Override
 	public void send(Packet packet) {
 		this.connection.send(packet);
+	}
+	
+	public void requestCloseServer() {
+		this.internalConnection.send(new CloseServerPacket());
 	}
 	
 	@Override
