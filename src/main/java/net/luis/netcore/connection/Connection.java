@@ -165,7 +165,7 @@ public sealed abstract class Connection extends SimpleChannelInboundHandler<Pack
 	//endregion
 	
 	//region Listener registration
-
+	
 	//endregion
 	
 	private void callListeners(Packet packet) {

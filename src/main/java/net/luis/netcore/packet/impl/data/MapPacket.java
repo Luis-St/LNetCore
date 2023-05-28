@@ -34,7 +34,7 @@ public class MapPacket extends Packet implements Supplier<Map<Object, Object>> {
 	}
 	
 	@Override
-	public Map<Object, Object> get() {
+	public @NotNull Map<Object, Object> get() {
 		return this.values;
 	}
 	

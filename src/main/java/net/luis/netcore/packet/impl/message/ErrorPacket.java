@@ -31,7 +31,7 @@ public class ErrorPacket extends Packet {
 		buffer.writeInt(this.errorCode);
 	}
 	
-	public String getMessage() {
+	public @NotNull String getMessage() {
 		return this.message;
 	}
 	

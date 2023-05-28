@@ -30,7 +30,7 @@ public class ObjectPacket extends Packet implements Supplier<Object> {
 	}
 	
 	@Override
-	public Object get() {
+	public @NotNull Object get() {
 		return this.value;
 	}
 	

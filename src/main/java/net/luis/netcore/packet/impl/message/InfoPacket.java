@@ -27,7 +27,7 @@ public class InfoPacket extends Packet {
 		buffer.writeString(this.message);
 	}
 	
-	public String getMessage() {
+	public @NotNull String getMessage() {
 		return this.message;
 	}
 }

@@ -163,8 +163,11 @@ public final class FriendlyByteBuffer {
 	
 	public void writeUnsafe(Object object) {
 		Objects.requireNonNull(object, "Object must not be null");
+		if (!(object instanceof Encodable encodable)) {
+			throw new IllegalArgumentException("Can not write object of type " + object.getClass().getSimpleName() + " as it does not implement Encodable");
+		}
 		this.writeString(object.getClass().getName());
-		this.write((Encodable) object);
+		this.write(encodable);
 	}
 	
 	public <T extends Encodable> void writeInterface(T value) {

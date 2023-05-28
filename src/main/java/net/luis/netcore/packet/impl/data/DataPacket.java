@@ -34,7 +34,7 @@ public class DataPacket extends Packet implements Supplier<Object[]> {
 	}
 	
 	@Override
-	public Object[] get() {
+	public @NotNull Object[] get() {
 		return this.values;
 	}
 	

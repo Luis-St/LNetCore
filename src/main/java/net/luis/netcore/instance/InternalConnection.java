@@ -1,8 +1,8 @@
 package net.luis.netcore.instance;
 
 import io.netty.channel.*;
-import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.Connection;
+import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.exception.SkipPacketException;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.*;

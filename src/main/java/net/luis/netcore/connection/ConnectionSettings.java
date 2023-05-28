@@ -4,7 +4,6 @@ import net.luis.netcore.packet.permission.PermissionHandler;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 

@@ -34,7 +34,7 @@ public class ListPacket extends Packet implements Supplier<List<Object>> {
 	}
 	
 	@Override
-	public List<Object> get() {
+	public @NotNull List<Object> get() {
 		return this.values;
 	}
 	

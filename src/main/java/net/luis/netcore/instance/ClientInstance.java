@@ -2,15 +2,13 @@ package net.luis.netcore.instance;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.luis.netcore.connection.*;
+import net.luis.netcore.connection.Connection;
 import net.luis.netcore.connection.channel.SimpleChannelInitializer;
 import net.luis.netcore.connection.internal.ClientConnection;
 import net.luis.netcore.connection.util.ConnectionInitializer;
 import net.luis.netcore.instance.event.ClosingEvent;
 import net.luis.netcore.packet.Packet;
 import net.luis.netcore.packet.impl.internal.CloseConnectionPacket;
-import net.luis.netcore.packet.listener.PacketPriority;
-import net.luis.netcore.packet.util.PacketWrapper;
 import net.luis.utils.event.Event;
 import net.luis.utils.util.Pair;
 import org.apache.logging.log4j.LogManager;
