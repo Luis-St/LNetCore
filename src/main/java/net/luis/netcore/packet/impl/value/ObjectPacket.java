@@ -2,6 +2,7 @@ package net.luis.netcore.packet.impl.value;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -30,6 +31,7 @@ public class ObjectPacket extends Packet implements Supplier<Object> {
 	}
 	
 	@Override
+	@PacketGetter("value")
 	public @NotNull Object get() {
 		return this.value;
 	}

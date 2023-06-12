@@ -5,8 +5,8 @@ import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.netcore.packet.permission.RequiresPermission;
-import net.luis.netcore.packet.util.PacketWrapper;
 import net.luis.netcore.packet.util.Skippable;
+import net.luis.netcore.packet.wrapper.PacketWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

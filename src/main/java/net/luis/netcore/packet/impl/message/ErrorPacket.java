@@ -2,6 +2,7 @@ package net.luis.netcore.packet.impl.message;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,10 +32,12 @@ public class ErrorPacket extends Packet {
 		buffer.writeInt(this.errorCode);
 	}
 	
+	@PacketGetter("message")
 	public @NotNull String getMessage() {
 		return this.message;
 	}
 	
+	@PacketGetter("errorCode")
 	public int getErrorCode() {
 		return this.errorCode;
 	}

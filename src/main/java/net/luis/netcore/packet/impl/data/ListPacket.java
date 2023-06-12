@@ -5,6 +5,7 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class ListPacket extends Packet implements Supplier<List<Object>> {
 	}
 	
 	@Override
+	@PacketGetter("values")
 	public @NotNull List<Object> get() {
 		return this.values;
 	}

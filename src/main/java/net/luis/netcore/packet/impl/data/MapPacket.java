@@ -5,6 +5,7 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -34,6 +35,7 @@ public class MapPacket extends Packet implements Supplier<Map<Object, Object>> {
 	}
 	
 	@Override
+	@PacketGetter("values")
 	public @NotNull Map<Object, Object> get() {
 		return this.values;
 	}

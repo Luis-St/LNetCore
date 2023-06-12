@@ -2,6 +2,7 @@ package net.luis.netcore.packet.impl.action;
 
 import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -33,11 +34,13 @@ public class ResponsePacket extends Packet implements Supplier<Object> {
 		buffer.writeUnsafe(this.response);
 	}
 	
+	@PacketGetter("message")
 	public @NotNull String getMessage() {
 		return this.message;
 	}
 	
 	@Override
+	@PacketGetter("response")
 	public @NotNull Object get() {
 		return this.response;
 	}

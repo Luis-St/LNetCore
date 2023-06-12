@@ -4,6 +4,7 @@ import net.luis.netcore.buffer.FriendlyByteBuffer;
 import net.luis.netcore.buffer.decode.Decodable;
 import net.luis.netcore.buffer.encode.Encodable;
 import net.luis.netcore.packet.Packet;
+import net.luis.netcore.packet.wrapper.PacketGetter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public class DataPacket extends Packet implements Supplier<Object[]> {
 	}
 	
 	@Override
+	@PacketGetter("values")
 	public @NotNull Object[] get() {
 		return this.values;
 	}
