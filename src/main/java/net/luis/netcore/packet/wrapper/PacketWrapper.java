@@ -1,4 +1,4 @@
-package net.luis.netcore.packet.util;
+package net.luis.netcore.packet.wrapper;
 
 import net.luis.netcore.packet.Packet;
 

@@ -31,4 +31,5 @@ module net.luis.netcore {
 	exports net.luis.netcore.packet.permission;
 	exports net.luis.netcore.packet.registry;
 	exports net.luis.netcore.packet.util;
+	exports net.luis.netcore.packet.wrapper;
 }
