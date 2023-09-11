@@ -28,7 +28,7 @@ import static net.luis.netcore.connection.event.ConnectionEventType.*;
  *
  */
 
-public sealed abstract class Connection extends SimpleChannelInboundHandler<Packet> permits ClientConnection, ServerConnection {
+public abstract class Connection extends SimpleChannelInboundHandler<Packet> {
 	
 	private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 	

@@ -9,8 +9,7 @@ import net.luis.netcore.packet.impl.value.StringPacket;
 import net.luis.netcore.packet.listener.PacketListener;
 import net.luis.netcore.packet.listener.PacketTarget;
 import net.luis.utils.logging.LoggingUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,10 +20,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class ClientTest {
 	
-	private static final Logger LOGGER = LogManager.getLogger(ClientTest.class);
+	private static final Logger LOGGER;
 	
 	public static void main(String[] args) {
-		LoggingUtils.enableConsoleDebug();
+		LoggingUtils.enableConsole(Level.DEBUG);
 		ClientInstance client = new ClientInstance(ClientTest::initializeConnection);
 		client.handshake(new IntegerPacket(10));
 		client.open("localhost", 8080);
@@ -50,5 +49,10 @@ public class ClientTest {
 				LOGGER.info("Message from server: {}", strPacket.get());
 			}
 		}
+	}
+	
+	static {
+		LoggingUtils.initialize();
+		LOGGER = LogManager.getLogger(ClientTest.class);
 	}
 }
